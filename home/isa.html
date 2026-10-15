@@ -1261,6 +1261,7 @@
     openBtn.addEventListener('click', () => {
       if (openedAt !== null) return;
       openedAt = clock.getElapsedTime();
+      try { window.goatcounter && window.goatcounter.count({ path: 'abrio-sorpresa', title: 'Abrió la sorpresa 🌷', event: true }); } catch (e) { /* sin contador */ }
       introFrom.copy(camera.position);
       intro.classList.add('hide');
       setTimeout(() => document.getElementById('message').classList.add('show'), 2600);
@@ -1412,5 +1413,7 @@
     }
     animate();
   </script>
+  <!-- Contador de visitas (GoatCounter) -->
+  <script data-goatcounter="https://wiliwli.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
