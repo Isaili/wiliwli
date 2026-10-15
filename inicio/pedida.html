@@ -1,80 +1,1765 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>Flores para ti ❤️</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Quicksand:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --ink: #fff4f8;
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.18);
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body { overflow-x: hidden; }
+
     body {
       margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-      background-color: LightSkyBlue;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
+      min-height: 100vh;
+      min-height: 100dvh;
+      display: grid;
+      place-items: center;
+      padding: 16px;
+      font-family: 'Quicksand', system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 50% 120%, #5a1f4a 0%, transparent 60%),
+        radial-gradient(ellipse at 50% -20%, #07031a 0%, transparent 70%),
+        #2a0f3a;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #bg3d,
+    #scene3d {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+    #bg3d { z-index: 1; }
+    /* Capa del frente: encima de la tarjeta, pero deja pasar los clics al formulario */
+    #scene3d { z-index: 3; pointer-events: none; }
+
+    .hearts { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 0; }
+    .hearts span {
+      position: absolute;
+      bottom: -40px;
+      font-size: var(--s);
+      left: var(--x);
+      opacity: 0;
+      filter: drop-shadow(0 0 10px rgba(255, 92, 147, 0.7));
+      animation: rise var(--d) linear var(--delay) infinite;
+    }
+    @keyframes rise {
+      0% { transform: translateY(0) rotate(0); opacity: 0; }
+      10% { opacity: 0.9; }
+      100% { transform: translateY(-110vh) rotate(40deg); opacity: 0; }
     }
 
     .login-container {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      position: relative;
+      z-index: 2;
+      width: min(360px, 100%);
+      padding: 34px 28px 30px;
       text-align: center;
+      border-radius: 28px;
+      background: rgba(42, 15, 58, 0.45);
+      border: 1px solid var(--glass-border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      animation: floatIn 1s cubic-bezier(.2, .8, .2, 1) both;
     }
 
+    .login-container .icon { font-size: 34px; filter: drop-shadow(0 0 14px rgba(255, 92, 147, 0.8)); }
+
     .login-container h2 {
-      color: Chocolate;
+      margin: 4px 0 22px;
+      font-family: 'Great Vibes', cursive;
+      font-weight: 400;
+      font-size: 48px;
+      color: #ffe1ec;
+      text-shadow: 0 0 22px rgba(255, 92, 147, 0.6);
     }
 
     .login-container input {
       display: block;
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 13px 16px;
+      margin: 0 0 12px;
+      font: inherit;
       font-size: 16px;
+      color: var(--ink);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--glass-border);
+      border-radius: 14px;
+      outline: none;
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .login-container input::placeholder { color: rgba(255, 236, 244, 0.5); }
+    .login-container input:focus {
+      border-color: #ff7aa8;
+      box-shadow: 0 0 0 4px rgba(255, 92, 147, 0.2);
     }
 
     .login-container button {
-      background-color: Chocolate;
+      width: 100%;
+      margin-top: 6px;
+      padding: 14px 20px;
+      font: inherit;
+      font-weight: 600;
+      font-size: 16px;
       color: white;
       border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 16px;
+      border-radius: 999px;
       cursor: pointer;
+      background: linear-gradient(135deg, #ff7aa8, #ff3d7f 55%, #c2185b);
+      box-shadow: 0 10px 30px rgba(255, 61, 127, 0.45);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .login-container button:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(255, 61, 127, 0.6); }
+    .login-container button:active { transform: scale(0.98); }
+
+    .tip {
+      margin: 14px 0 0;
+      font-size: 12px;
+      color: rgba(255, 236, 244, 0.6);
     }
 
-    .login-container button:hover {
-      background-color: DarkRed;
+    #error-message {
+      margin: 14px 0 0;
+      color: #ff9cb5;
+      font-size: 14px;
+      display: none;
+    }
+
+    .shake { animation: shake 0.45s ease; }
+
+    .bubble {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 4;
+      padding: 8px 14px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.95);
+      color: #2f6b2a;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      opacity: 0;
+      transition: opacity .3s ease;
+      pointer-events: none;
+    }
+    .bubble.show { opacity: 1; }
+    .bubble.flynn { color: #2e5f63; background: #fff8e8; }
+
+    .pop-heart {
+      position: fixed;
+      z-index: 4;
+      font-size: 22px;
+      pointer-events: none;
+      animation: popHeart 1.4s ease-out forwards;
+    }
+
+    @keyframes floatIn {
+      from { opacity: 0; transform: translateY(30px) scale(0.96); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes shake {
+      20%, 60% { transform: translateX(-8px); }
+      40%, 80% { transform: translateX(8px); }
+    }
+    @keyframes popHeart {
+      from { opacity: 1; transform: translate(-50%, -50%) scale(.6); }
+      to { opacity: 0; transform: translate(calc(-50% + var(--dx)), -120px) scale(1.3); }
+    }
+
+    @media (max-width: 480px) {
+      .login-container { padding: 28px 20px 24px; }
+      .login-container h2 { font-size: 42px; margin-bottom: 18px; }
+      .bubble { font-size: 12px; padding: 7px 12px; }
     }
   </style>
 </head>
 <body>
-  <div class="login-container">
+  <div class="hearts" id="hearts"></div>
+  <canvas id="bg3d" aria-hidden="true"></canvas>
+  <canvas id="scene3d" aria-hidden="true"></canvas>
+  <div class="bubble" id="bubble"></div>
+  <div class="bubble flynn" id="flynnBubble"></div>
+
+  <form class="login-container" id="login">
+    <div class="icon">🌷</div>
     <h2>Iniciar Sesión</h2>
-    <input type="text" id="username" placeholder="Usuario">
-    <input type="password" id="password" placeholder="Contraseña">
-    <button onclick="login()">Ingresar</button>
-    <p id="error-message" style="color: red; display: none;">Usuario o contraseña incorrectos</p>
-  </div>
+    <input type="text" id="username" placeholder="Usuario" autocomplete="username" autocapitalize="none">
+    <input type="password" id="password" placeholder="Contraseña" autocomplete="current-password">
+    <button type="submit">Ingresar</button>
+    <p id="error-message">Usuario o contraseña incorrectos</p>
+    <p class="tip">Psst… toca a Pascal 🦎</p>
+  </form>
 
   <script>
-    function login() {
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+    const hearts = document.getElementById('hearts');
+    const icons = ['💗', '💖', '🌸', '💕', '🌷'];
+    for (let i = 0; i < 16; i++) {
+      const s = document.createElement('span');
+      s.textContent = icons[i % icons.length];
+      s.style.setProperty('--x', Math.random() * 100 + 'vw');
+      s.style.setProperty('--s', 14 + Math.random() * 18 + 'px');
+      s.style.setProperty('--d', 8 + Math.random() * 8 + 's');
+      s.style.setProperty('--delay', -Math.random() * 14 + 's');
+      hearts.appendChild(s);
+    }
+  </script>
 
-      if (username === 'karen' && password === '2020') {
-      
-        window.location.href = '../home/isa.html'; 
-      } else {
-       
-        const errorMessage = document.getElementById('error-message');
-        errorMessage.style.display = 'block';
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
       }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const TAU = Math.PI * 2;
+    const V = THREE.Vector3;
+    const form = document.getElementById('login');
+    const userInput = document.getElementById('username');
+    const passInput = document.getElementById('password');
+    const bubble = document.getElementById('bubble');
+
+    function mulberry32(a) {
+      return function () {
+        a |= 0; a = a + 0x6D2B79F5 | 0;
+        let t = Math.imul(a ^ a >>> 15, 1 | a);
+        t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+    const easeOutBack = (t, s = 1.4) => 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2);
+
+    // ---------- Dos capas: fondo (torre, linternas) detrás de la tarjeta, frente (enredaderas, Pascal, Maximus) encima ----------
+    const pixelRatio = Math.min(window.devicePixelRatio, window.innerWidth < 700 ? 1.5 : 2);
+    function makeRenderer(canvas) {
+      const r = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+      r.setPixelRatio(pixelRatio);
+      r.setSize(window.innerWidth, window.innerHeight);
+      r.setClearColor(0x000000, 0);
+      r.toneMapping = THREE.ACESFilmicToneMapping;
+      return r;
+    }
+    const bgRenderer = makeRenderer(document.getElementById('bg3d'));
+    const renderer = makeRenderer(document.getElementById('scene3d'));
+
+    const bgScene = new THREE.Scene();
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 100);
+    camera.position.set(0, 0, 10);
+    const tan20 = Math.tan(THREE.MathUtils.degToRad(20));
+    let HH = 10 * tan20;
+    let WW = HH * camera.aspect;
+
+    for (const s of [scene, bgScene]) {
+      s.add(new THREE.HemisphereLight('#ffe6f2', '#2a3a2a', 1.7));
+      const key = new THREE.DirectionalLight('#fff0dd', 2.2);
+      key.position.set(3, 5, 6);
+      s.add(key);
+      const rim = new THREE.DirectionalLight('#c9a2ff', 1.2);
+      rim.position.set(-5, -2, -4);
+      s.add(rim);
+    }
+
+    function glowTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 64;
+      const g = c.getContext('2d');
+      const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+      gr.addColorStop(0, 'rgba(255,255,255,1)');
+      gr.addColorStop(0.3, 'rgba(255,255,255,0.5)');
+      gr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = gr;
+      g.fillRect(0, 0, 64, 64);
+      const tex = new THREE.CanvasTexture(c);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const glowTex = glowTexture();
+    const sphere = new THREE.SphereGeometry(1, 20, 14);
+
+    function mesh(geo, mat, parent, x = 0, y = 0, z = 0) {
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(x, y, z);
+      parent.add(m);
+      return m;
+    }
+
+    // ---------- Fondo: luna, colinas y la torre ----------
+    const BG_Z = -9;
+    const bgHalfH = (10 - BG_Z) * tan20;
+    const moon = new THREE.Group();
+    mesh(sphere, new THREE.MeshBasicMaterial({ color: '#fff3d6' }), moon).scale.setScalar(1.1);
+    const moonGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffe2b0', transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending, depthWrite: false }));
+    moonGlow.scale.setScalar(6);
+    moon.add(moonGlow);
+    bgScene.add(moon);
+
+    const hills = new THREE.Group();
+    const hillMat = new THREE.MeshStandardMaterial({ color: '#1e0f2e', roughness: 1 });
+    [[-8, 7, 3], [0, 9, 2.4], [9, 8, 3.2], [-15, 6, 2.6], [16, 7, 2.8]].forEach(([x, w, h]) => {
+      mesh(sphere, hillMat, hills, x, 0, 0).scale.set(w, h, 2);
+    });
+    bgScene.add(hills);
+
+    const tower = new THREE.Group();
+    {
+      const rnd = mulberry32(99);
+      const stoneGeo = new THREE.CylinderGeometry(0.75, 0.95, 10, 14, 24);
+      const pos = stoneGeo.attributes.position;
+      const colors = new Float32Array(pos.count * 3);
+      const cA = new THREE.Color('#8f84a8');
+      const cB = new THREE.Color('#5f5577');
+      const c = new THREE.Color();
+      for (let i = 0; i < pos.count; i++) {
+        const j = 1 + (rnd() - 0.5) * 0.06;
+        pos.setX(i, pos.getX(i) * j);
+        pos.setZ(i, pos.getZ(i) * j);
+        c.copy(cA).lerp(cB, rnd() * 0.8 + (pos.getY(i) < -2 ? 0.2 : 0));
+        colors.set([c.r, c.g, c.b], i * 3);
+      }
+      stoneGeo.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+      stoneGeo.computeVertexNormals();
+      const stoneMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.95, flatShading: true });
+      mesh(stoneGeo, stoneMat, tower, 0, -3, 0);
+      mesh(new THREE.CylinderGeometry(1.05, 0.8, 0.6, 16), stoneMat, tower, 0, 2.2, 0);
+      mesh(new THREE.CylinderGeometry(1.25, 1.05, 1.7, 16), stoneMat, tower, 0, 3.3, 0);
+      const trim = mesh(new THREE.TorusGeometry(1.27, 0.07, 8, 32), new THREE.MeshStandardMaterial({ color: '#3b2a5a' }), tower, 0, 4.15, 0);
+      trim.rotation.x = Math.PI / 2;
+      const roofMat = new THREE.MeshStandardMaterial({ color: '#5b3a8c', roughness: 0.6, flatShading: true });
+      mesh(new THREE.ConeGeometry(1.7, 2.6, 16), roofMat, tower, 0, 5.4, 0);
+      mesh(sphere, new THREE.MeshStandardMaterial({ color: '#ffcc4d', metalness: 0.8, roughness: 0.3 }), tower, 0, 6.8, 0).scale.setScalar(0.12);
+      // Torrecilla lateral
+      mesh(new THREE.CylinderGeometry(0.35, 0.35, 1.2, 10), stoneMat, tower, 1.05, 3.6, -0.3);
+      mesh(new THREE.ConeGeometry(0.48, 1, 10), roofMat, tower, 1.05, 4.7, -0.3);
+      // Ventana iluminada
+      const winMat = new THREE.MeshBasicMaterial({ color: '#ffcf7a' });
+      const win = mesh(new THREE.PlaneGeometry(0.5, 0.75), winMat, tower, 0, 3.3, 1.27);
+      mesh(new THREE.CircleGeometry(0.25, 16, 0, Math.PI), winMat, tower, 0, 3.67, 1.27);
+      const winGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, color: '#ffb347', transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+      winGlow.scale.setScalar(2.4);
+      winGlow.position.set(0, 3.4, 1.4);
+      tower.add(winGlow);
+      // Trenza dorada colgando de la ventana
+      const hairPts = [];
+      for (let i = 0; i <= 20; i++) {
+        const t = i / 20;
+        hairPts.push(new V(Math.sin(t * 3) * 0.25, 2.95 - t * 9, 1.3 + t * 0.6));
+      }
+      mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(hairPts), 80, 0.08, 6),
+        new THREE.MeshStandardMaterial({ color: '#f7d35c', emissive: '#b8860b', emissiveIntensity: 0.4, roughness: 0.4 }), tower);
+      // Hiedra en la torre
+      const leafGeo = new THREE.PlaneGeometry(0.22, 0.22);
+      const ivy = new THREE.InstancedMesh(leafGeo, new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.8 }), 140);
+      const d = new THREE.Object3D();
+      const ivyColors = ['#1b4d2a', '#245c34', '#2f3f2a', '#173d22'].map((x) => new THREE.Color(x));
+      for (let i = 0; i < 140; i++) {
+        const a = -Math.PI / 2 + (rnd() - 0.5) * 2.6;
+        const y = -6 + Math.pow(rnd(), 1.6) * 8.5;
+        const r = 0.88 - (y + 8) * 0.012;
+        d.position.set(Math.sin(a) * r, y, Math.cos(a) * r);
+        d.rotation.set(rnd() * 3, a + rnd(), rnd() * 3);
+        d.scale.setScalar(0.7 + rnd() * 0.8);
+        d.updateMatrix();
+        ivy.setMatrixAt(i, d.matrix);
+        ivy.setColorAt(i, ivyColors[(rnd() * 4) | 0]);
+      }
+      tower.add(ivy);
+    }
+    tower.position.z = BG_Z;
+    bgScene.add(tower);
+
+    function layoutBackground() {
+      const halfW = bgHalfH * camera.aspect;
+      const narrow = camera.aspect < 0.8;
+      tower.position.x = narrow ? halfW * 0.5 : -halfW * 0.58;
+      tower.position.y = narrow ? 0.4 : -1.2;
+      tower.scale.setScalar(narrow ? 0.75 : 0.9);
+      moon.position.set(narrow ? -halfW * 0.5 : halfW * 0.55, bgHalfH * 0.62, BG_Z - 6);
+      hills.position.set(0, -bgHalfH - 1.5, BG_Z + 1);
+      hills.scale.set(Math.max(1, camera.aspect), 1, 1);
+    }
+    layoutBackground();
+
+    // ---------- Linternas flotantes ----------
+    const lanterns = [];
+    {
+      const rnd = mulberry32(7);
+      const geo = new THREE.CylinderGeometry(0.13, 0.1, 0.28, 8);
+      const mat = new THREE.MeshStandardMaterial({ color: '#ffcf7a', emissive: '#ff9a2e', emissiveIntensity: 1.8, roughness: 0.6 });
+      const glow = new THREE.SpriteMaterial({ map: glowTex, color: '#ffb347', transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, opacity: 0.75 });
+      for (let i = 0; i < 22; i++) {
+        const g = new THREE.Group();
+        g.add(new THREE.Mesh(geo, mat));
+        const s = new THREE.Sprite(glow);
+        s.scale.setScalar(1.1);
+        g.add(s);
+        g.position.z = -3 - rnd() * 8;
+        bgScene.add(g);
+        lanterns.push({ g, xn: rnd() * 2 - 1, y: rnd(), speed: 0.12 + rnd() * 0.2, phase: rnd() * TAU });
+      }
+    }
+
+    // ---------- Enredaderas ----------
+    const leafGeo = (() => {
+      const s = new THREE.Shape();
+      s.moveTo(0, 0);
+      s.quadraticCurveTo(0.13, 0.12, 0, 0.32);
+      s.quadraticCurveTo(-0.13, 0.12, 0, 0);
+      return new THREE.ShapeGeometry(s, 6);
+    })();
+    const leafMat = new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, roughness: 0.55 });
+    const centerMat = new THREE.MeshStandardMaterial({ color: '#ffcc33', emissive: '#ffaa00', emissiveIntensity: 0.5 });
+    const petalMatCache = {};
+    const petalMat = (c) => petalMatCache[c] ||= new THREE.MeshStandardMaterial({ color: c, roughness: 0.5, emissive: c, emissiveIntensity: 0.15 });
+
+    const STYLES = {
+      claro: {
+        vine: new THREE.MeshStandardMaterial({ color: '#3d7a33', roughness: 0.7 }),
+        tendril: new THREE.MeshStandardMaterial({ color: '#6fbf55', roughness: 0.6 }),
+        leaves: ['#2f7a3a', '#4caf50', '#6fcf5a', '#3d8f3f'],
+        flowers: ['#ff7aa8', '#ffffff', '#c9a2ff', '#ffd45c', '#ff9cc2'],
+      },
+      bosque: {
+        vine: new THREE.MeshStandardMaterial({ color: '#1f3d1c', roughness: 0.7 }),
+        tendril: new THREE.MeshStandardMaterial({ color: '#2f5a2a', roughness: 0.6 }),
+        leaves: ['#173d22', '#1f4d2c', '#2a5a33', '#123020'],
+        flowers: ['#7a2a8c', '#a01e4f', '#3f2a7a', '#c2185b'],
+      },
+      vino: {
+        vine: new THREE.MeshStandardMaterial({ color: '#3d1f33', roughness: 0.7 }),
+        tendril: new THREE.MeshStandardMaterial({ color: '#5a2a4a', roughness: 0.6 }),
+        leaves: ['#4a1f3d', '#2f1a3a', '#1f4d2c', '#5a1f3a'],
+        flowers: ['#d14d82', '#9b6bdc', '#ff7aa8'],
+      },
+      noche: {
+        vine: new THREE.MeshStandardMaterial({ color: '#1d3d3a', roughness: 0.7 }),
+        tendril: new THREE.MeshStandardMaterial({ color: '#2a5a55', roughness: 0.6 }),
+        leaves: ['#1d4a45', '#163a36', '#245c34', '#2f3f5a'],
+        flowers: ['#6c9cff', '#c9a2ff', '#ffffff'],
+      },
+    };
+
+    function makeFlower(color) {
+      const g = new THREE.Group();
+      const m = petalMat(color);
+      for (let k = 0; k < 5; k++) {
+        const a = k * TAU / 5;
+        const p = mesh(sphere, m, g, Math.cos(a) * 0.055, Math.sin(a) * 0.055, 0);
+        p.rotation.z = a;
+        p.scale.set(0.055, 0.035, 0.015);
+      }
+      mesh(sphere, centerMat, g, 0, 0, 0.01).scale.setScalar(0.028);
+      return g;
+    }
+
+    const vineRoot = new THREE.Group();
+    scene.add(vineRoot);
+    let vines = [];
+
+    function buildVine(points, rnd, { kind, up, style = 'claro', sway = 0, walk = true, thick = 0.045 }) {
+      const st = STYLES[style];
+      const anchor = points[0].clone();
+      const group = new THREE.Group();
+      group.position.copy(anchor);
+      const curve = new THREE.CatmullRomCurve3(points.map((p) => p.clone().sub(anchor)));
+      const len = curve.getLength();
+      mesh(new THREE.TubeGeometry(curve, Math.max(40, Math.floor(len * 25)), thick, 6), st.vine, group);
+
+      const n = Math.floor(len * 30);
+      const tPts = [];
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const p = curve.getPointAt(t);
+        const T = curve.getTangentAt(t);
+        const a = t * len * 9;
+        p.addScaledVector(new V(-T.y, T.x, 0).normalize(), Math.sin(a) * 0.07);
+        p.z += Math.cos(a) * 0.07;
+        tPts.push(p);
+      }
+      mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(tPts), n * 2, 0.014, 4), st.tendril, group);
+
+      const nLeaves = Math.floor(len / 0.15);
+      const leaves = new THREE.InstancedMesh(leafGeo, leafMat, nLeaves);
+      const d = new THREE.Object3D();
+      const lc = st.leaves.map((c) => new THREE.Color(c));
+      for (let i = 0; i < nLeaves; i++) {
+        const t = Math.min((i + rnd() * 0.5) / nLeaves, 1);
+        const p = curve.getPointAt(t);
+        const T = curve.getTangentAt(t);
+        const side = i % 2 ? 1 : -1;
+        const dirAngle = Math.atan2(T.y, T.x) + side * (Math.PI / 2 - 0.5 + rnd() * 0.4);
+        d.position.copy(p);
+        d.rotation.set((rnd() - 0.5) * 1.2, (rnd() - 0.5) * 1.2, dirAngle - Math.PI / 2);
+        d.scale.setScalar(0.7 + rnd() * 0.7);
+        d.updateMatrix();
+        leaves.setMatrixAt(i, d.matrix);
+        leaves.setColorAt(i, lc[(rnd() * lc.length) | 0]);
+      }
+      group.add(leaves);
+
+      const nFlowers = Math.floor(len / 0.5);
+      for (let i = 0; i < nFlowers; i++) {
+        const f = makeFlower(st.flowers[(rnd() * st.flowers.length) | 0]);
+        f.position.copy(curve.getPointAt((i + 0.5) / nFlowers));
+        f.position.z += 0.06;
+        f.rotation.z = rnd() * TAU;
+        f.scale.setScalar(0.8 + rnd() * 0.6);
+        group.add(f);
+      }
+
+      const cx = points.reduce((a, p) => a + p.x, 0) / points.length;
+      vineRoot.add(group);
+      return { group, curve, len, kind, up, sway, walk, cx, phase: rnd() * TAU, grow: 1, grabbed: null };
+    }
+
+    function buildVines(animateGrowth) {
+      vineRoot.traverse((o) => {
+        if (o.geometry && o.geometry !== leafGeo && o.geometry !== sphere) o.geometry.dispose();
+      });
+      vineRoot.clear();
+      vineRoot.visible = true;
+      const rnd = mulberry32(2020);
+      const W = WW;
+      const H = HH;
+      const narrow = camera.aspect < 0.8;
+      vines = [];
+
+      const garland = (yTop, sag, phase, z) => {
+        const pts = [];
+        for (let i = 0; i <= 10; i++) {
+          const t = i / 10;
+          pts.push(new V(-W - 0.6 + t * (2 * W + 1.2), yTop - sag * Math.pow(Math.sin(t * Math.PI * 2 + phase), 2), z));
+        }
+        return pts;
+      };
+      const hang = (x, bottom, s, z) => {
+        const pts = [];
+        for (let i = 0; i <= 8; i++) {
+          const t = i / 8;
+          pts.push(new V(x + Math.sin(t * 5 + s) * 0.25 * t, H + 0.3 - t * (H + 0.3 - bottom), z));
+        }
+        return pts;
+      };
+      const climb = (sx, x0, reach, z) => {
+        const pts = [];
+        for (let i = 0; i <= 8; i++) {
+          const t = i / 8;
+          pts.push(new V(sx * (x0 - t * W * 0.4) + Math.sin(t * 6) * 0.2, -H - 0.3 + t * reach, z));
+        }
+        return pts;
+      };
+
+      // La principal (por donde más camina Pascal)
+      vines.push(buildVine(garland(H - 0.25, 0.8, 0, 0), rnd, { kind: 'garland', up: new V(0, 1, 0) }));
+      // Guirnaldas oscuras de fondo
+      vines.push(buildVine(garland(H - 0.05, narrow ? 0.7 : 1.1, 1.1, -0.5), rnd, { kind: 'garland', up: new V(0, 1, 0), style: 'bosque', walk: false, thick: 0.055 }));
+      vines.push(buildVine(garland(H + 0.1, 0.5, 2.2, -0.3), rnd, { kind: 'garland', up: new V(0, 1, 0), style: 'vino', walk: false }));
+
+      const hb = narrow ? H * 0.5 : -H * 0.1;
+      const hb2 = narrow ? H * 0.62 : H * 0.3;
+      vines.push(buildVine(hang(-W * 0.78, hb, 0, 0.2), rnd, { kind: 'hang', up: new V(1, 0, 0), sway: 0.05 }));
+      vines.push(buildVine(hang(W * 0.8, hb + 0.4, 2, 0.2), rnd, { kind: 'hang', up: new V(-1, 0, 0), sway: 0.05 }));
+      vines.push(buildVine(hang(-W * 0.5, hb2, 1, -0.4), rnd, { kind: 'hang', up: new V(1, 0, 0), sway: 0.06, style: 'vino', walk: false }));
+      vines.push(buildVine(hang(W * 0.52, hb2 + 0.3, 3, -0.4), rnd, { kind: 'hang', up: new V(-1, 0, 0), sway: 0.06, style: 'noche', walk: false }));
+      vines.push(buildVine(hang(-W * 0.95, hb - 0.6, 4, -0.6), rnd, { kind: 'hang', up: new V(1, 0, 0), sway: 0.04, style: 'bosque', walk: false, thick: 0.06 }));
+      vines.push(buildVine(hang(W * 0.97, hb - 0.3, 5, -0.6), rnd, { kind: 'hang', up: new V(-1, 0, 0), sway: 0.04, style: 'bosque', walk: false, thick: 0.06 }));
+
+      const reach = narrow ? H * 0.42 : H * 0.9;
+      vines.push(buildVine(climb(-1, W + 0.3, reach, -0.2), rnd, { kind: 'climb', up: new V(1, 0, 0) }));
+      vines.push(buildVine(climb(1, W + 0.3, reach, -0.2), rnd, { kind: 'climb', up: new V(-1, 0, 0) }));
+      vines.push(buildVine(climb(-1, W * 0.75, reach * 0.7, -0.5), rnd, { kind: 'climb', up: new V(1, 0, 0), style: 'noche', walk: false }));
+      vines.push(buildVine(climb(1, W * 0.7, reach * 0.75, -0.5), rnd, { kind: 'climb', up: new V(-1, 0, 0), style: 'vino', walk: false }));
+
+      if (animateGrowth) {
+        vines.forEach((v, i) => {
+          v.grow = -i * 0.12;
+          v.group.scale.setScalar(0.001);
+        });
+      }
+    }
+    buildVines(true);
+
+    // ---------- Pascal 3D ----------
+    const COLORS = {
+      verde:    ['#7bc96f', '#3f8f3a', '#d6efa0'],
+      rosa:     ['#ff8fb8', '#d14d82', '#ffd3e4'],
+      morado:   ['#b48cff', '#7048c9', '#e4d6ff'],
+      amarillo: ['#ffd45c', '#c9971c', '#fff1b8'],
+      azul:     ['#6cc7ff', '#2f86c4', '#d2efff'],
+      rojo:     ['#ff6b6b', '#c0392b', '#ffd0c8'],
+    };
+    const cycle = ['verde', 'rosa', 'morado', 'amarillo', 'azul'];
+    let colorIndex = 0;
+
+    // Textura de escamas (gris claro para que el color del camaleón la tiña)
+    function scaleTexture() {
+      const c = document.createElement('canvas');
+      c.width = c.height = 256;
+      const g = c.getContext('2d');
+      g.fillStyle = '#d8d8d8';
+      g.fillRect(0, 0, 256, 256);
+      const rnd = mulberry32(5);
+      for (let row = 0; row < 32; row++) {
+        for (let col = 0; col < 32; col++) {
+          const x = col * 8 + (row % 2) * 4;
+          const y = row * 8;
+          const v = 200 + rnd() * 55;
+          const grd = g.createRadialGradient(x - 1, y - 1, 0.5, x, y, 4.2);
+          grd.addColorStop(0, `rgb(${v},${v},${v})`);
+          grd.addColorStop(1, `rgb(${v - 70},${v - 70},${v - 70})`);
+          g.fillStyle = grd;
+          g.beginPath();
+          g.arc(x, y, 4, 0, TAU);
+          g.fill();
+        }
+      }
+      const tex = new THREE.CanvasTexture(c);
+      tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+      tex.repeat.set(3, 3);
+      tex.colorSpace = THREE.SRGBColorSpace;
+      return tex;
+    }
+    const scalesTex = scaleTexture();
+    const skinMat = new THREE.MeshPhysicalMaterial({
+      color: '#7bc96f', roughness: 0.45, clearcoat: 0.5, clearcoatRoughness: 0.35,
+      map: scalesTex, bumpMap: scalesTex, bumpScale: 1.5,
+    });
+    let pascalCustom = null;
+    const darkMat = new THREE.MeshStandardMaterial({ color: '#3f8f3a', roughness: 0.5 });
+    const bellyMat = new THREE.MeshStandardMaterial({ color: '#d6efa0', roughness: 0.6 });
+    const whiteMat = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: 0.2 });
+    const pupilMat = new THREE.MeshStandardMaterial({ color: '#2a1a12', roughness: 0.15 });
+    const shineMat = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 1 });
+    const tongueMat = new THREE.MeshStandardMaterial({ color: '#ff6f91', roughness: 0.4 });
+    const blushMat = new THREE.MeshStandardMaterial({ color: '#ff9cb5', roughness: 0.6 });
+    const target = { skin: new THREE.Color('#7bc96f'), dark: new THREE.Color('#3f8f3a'), belly: new THREE.Color('#d6efa0') };
+
+    function setColor(name) {
+      const [s, d, b] = COLORS[name];
+      target.skin.set(s);
+      target.dark.set(d);
+      target.belly.set(b);
+    }
+
+    const root = new THREE.Group();
+    const inner = new THREE.Group();
+    inner.rotation.y = Math.PI / 2;
+    root.add(inner);
+    const model = new THREE.Group();
+    inner.add(model);
+
+    const bodyG = new THREE.Group();
+    model.add(bodyG);
+    const body = mesh(sphere, skinMat, bodyG, 0, 0.5, 0);
+    body.scale.set(0.5, 0.4, 0.72);
+    mesh(sphere, bellyMat, bodyG, 0, 0.4, 0.05).scale.set(0.43, 0.3, 0.63);
+    for (let i = 0; i < 3; i++) {
+      const z = 0.25 - i * 0.25;
+      const f = Math.sqrt(1 - (z / 0.72) ** 2) * 1.02;
+      mesh(new THREE.TorusGeometry(1, 0.06, 8, 32, Math.PI), darkMat, bodyG, 0, 0.5, z).scale.set(0.5 * f, 0.4 * f, 0.5);
+    }
+    for (let i = 0; i < 6; i++) {
+      const z = 0.45 - i * 0.18;
+      mesh(sphere, darkMat, bodyG, 0, 0.5 + 0.4 * Math.sqrt(Math.max(0, 1 - (z / 0.72) ** 2)), z).scale.setScalar(0.05);
+    }
+
+    const legGeo = new THREE.CapsuleGeometry(0.06, 0.2, 4, 8);
+    legGeo.translate(0, -0.16, 0);
+    const legs = [[0.32, 0.4], [-0.32, 0.4], [0.32, -0.4], [-0.32, -0.4]].map(([x, z]) => {
+      const g = new THREE.Group();
+      g.position.set(x, 0.34, z);
+      g.rotation.z = x > 0 ? 0.3 : -0.3;
+      mesh(legGeo, skinMat, g);
+      mesh(sphere, skinMat, g, 0, -0.34, 0.03).scale.set(0.09, 0.045, 0.11);
+      bodyG.add(g);
+      return g;
+    });
+
+    const tailG = new THREE.Group();
+    tailG.position.set(0, 0.42, -0.6);
+    model.add(tailG);
+    {
+      const pts = [new V(0, 0.42, -0.6), new V(0, 0.3, -0.85)];
+      const C = new V(0, 0.5, -1.05);
+      for (let i = 0; i <= 40; i++) {
+        const th = (i / 40) * 3.4 * Math.PI;
+        const r = 0.3 * (1 - (i / 40) * 0.82);
+        pts.push(new V(0, C.y - r * Math.cos(th), C.z - r * Math.sin(th)));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts);
+      const TS = 120, RS = 10;
+      const geo = new THREE.TubeGeometry(curve, TS, 0.09, RS, false);
+      const pos = geo.attributes.position;
+      const p = new V();
+      for (let i = 0; i <= TS; i++) {
+        const c = curve.getPointAt(i / TS);
+        const k = 1 - 0.8 * (i / TS);
+        for (let j = 0; j <= RS; j++) {
+          const idx = i * (RS + 1) + j;
+          p.fromBufferAttribute(pos, idx).sub(c).multiplyScalar(k).add(c);
+          pos.setXYZ(idx, p.x, p.y, p.z);
+        }
+      }
+      geo.computeVertexNormals();
+      mesh(geo, skinMat, tailG, 0, -0.42, 0.6);
+    }
+
+    const head = new THREE.Group();
+    head.position.set(0, 0.7, 0.62);
+    bodyG.add(head);
+    mesh(sphere, skinMat, head).scale.set(0.38, 0.34, 0.46);
+    const casque = mesh(sphere, skinMat, head, 0, 0.2, -0.18);
+    casque.scale.set(0.22, 0.28, 0.3);
+    casque.rotation.x = -0.5;
+    const mouth = mesh(new THREE.TorusGeometry(0.372, 0.018, 6, 40, Math.PI), darkMat, head, 0, -0.07, 0);
+    mouth.rotation.x = Math.PI / 2;
+    mouth.scale.set(1, 1.21, 1);
+    [-1, 1].forEach((s) => {
+      mesh(sphere, darkMat, head, 0.07 * s, 0.05, 0.45).scale.setScalar(0.018);
+      mesh(sphere, blushMat, head, 0.24 * s, -0.12, 0.3).scale.set(0.07, 0.04, 0.03);
+    });
+
+    const tongue = new THREE.Group();
+    tongue.position.set(0, -0.08, 0.42);
+    head.add(tongue);
+    {
+      const tGeo = new THREE.CylinderGeometry(0.025, 0.025, 1, 8);
+      tGeo.rotateX(Math.PI / 2);
+      tGeo.translate(0, 0, 0.5);
+      mesh(tGeo, tongueMat, tongue);
+    }
+    const tongueTip = mesh(sphere, tongueMat, tongue, 0, 0, 1);
+    tongue.visible = false;
+
+    const eyes = [-1, 1].map((s) => {
+      const g = new THREE.Group();
+      g.position.set(0.27 * s, 0.08, 0.14);
+      head.add(g);
+      const look = new THREE.Group();
+      g.add(look);
+      mesh(sphere, skinMat, look).scale.setScalar(0.2);
+      mesh(new THREE.TorusGeometry(0.175, 0.012, 8, 32), darkMat, look, 0, 0, 0.1);
+      mesh(new THREE.TorusGeometry(0.135, 0.01, 8, 32), darkMat, look, 0, 0, 0.15);
+      const ball = new THREE.Group();
+      ball.position.z = 0.09;
+      look.add(ball);
+      mesh(sphere, whiteMat, ball).scale.setScalar(0.135);
+      mesh(sphere, pupilMat, ball, 0, 0, 0.11).scale.set(0.07, 0.07, 0.035);
+      mesh(sphere, shineMat, ball, 0.025, 0.03, 0.14).scale.setScalar(0.018);
+      return { look, ball };
+    });
+
+    // Estrellitas de mareo
+    const dizzy = new THREE.Group();
+    dizzy.position.y = 0.55;
+    dizzy.visible = false;
+    head.add(dizzy);
+    {
+      const s = new THREE.Shape();
+      for (let i = 0; i < 10; i++) {
+        const r = i % 2 ? 0.4 : 1;
+        const a = (i / 10) * TAU + Math.PI / 2;
+        if (i === 0) s.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+        else s.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+      }
+      const starGeo = new THREE.ExtrudeGeometry(s, { depth: 0.3, bevelEnabled: false });
+      starGeo.center();
+      const starMat = new THREE.MeshStandardMaterial({ color: '#ffe066', emissive: '#ffcc00', emissiveIntensity: 1.2 });
+      for (let i = 0; i < 4; i++) {
+        const m = mesh(starGeo, starMat, dizzy, Math.cos(i * TAU / 4) * 0.45, 0, Math.sin(i * TAU / 4) * 0.45);
+        m.scale.setScalar(0.11);
+      }
+    }
+
+    const hit = new THREE.Mesh(new THREE.SphereGeometry(1.3, 8, 6), new THREE.MeshBasicMaterial({ visible: false }));
+    hit.position.set(0, 0.6, 0);
+    model.add(hit);
+
+    // ---------- Maximus, el caballo blanco ----------
+    function makeHorse() {
+      const root = new THREE.Group();
+      const m = new THREE.Group();
+      root.add(m);
+      const coat = new THREE.MeshPhysicalMaterial({ color: '#f4f1ea', roughness: 0.55, sheen: 0.6, sheenRoughness: 0.5, sheenColor: new THREE.Color('#ffffff') });
+      const muzzleMat = new THREE.MeshPhysicalMaterial({ color: '#d8cfc4', roughness: 0.5, sheen: 0.4 });
+      const maneMat = new THREE.MeshStandardMaterial({ color: '#e3c27a', roughness: 0.45, emissive: '#7a5a10', emissiveIntensity: 0.12 });
+      const hoofMat = new THREE.MeshStandardMaterial({ color: '#5c4f45', roughness: 0.6 });
+      const red = new THREE.MeshStandardMaterial({ color: '#8b1a2b', roughness: 0.5 });
+      const gold = new THREE.MeshStandardMaterial({ color: '#ffcc4d', metalness: 0.85, roughness: 0.3, emissive: '#a07000', emissiveIntensity: 0.25 });
+      const dark = new THREE.MeshStandardMaterial({ color: '#16110d', roughness: 0.15 });
+      const shineMatH = new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#ffffff', emissiveIntensity: 1 });
+      const bump = (x, c, w) => Math.exp(-(((x - c) / w) ** 2));
+
+      // Tubo que se afina (y aplana de lado) a lo largo de una curva
+      function taperTube(points, r0, r1, zScale = 1, seg = 40) {
+        const curve = new THREE.CatmullRomCurve3(points);
+        const RS = 14;
+        const geo = new THREE.TubeGeometry(curve, seg, 1, RS, false);
+        const pos = geo.attributes.position;
+        const p = new V();
+        for (let i = 0; i <= seg; i++) {
+          const t = i / seg;
+          const c = curve.getPointAt(t);
+          const r = r0 + (r1 - r0) * t;
+          for (let j = 0; j <= RS; j++) {
+            const idx = i * (RS + 1) + j;
+            p.fromBufferAttribute(pos, idx).sub(c).multiplyScalar(r);
+            p.z *= zScale;
+            p.add(c);
+            pos.setXYZ(idx, p.x, p.y, p.z);
+          }
+        }
+        geo.computeVertexNormals();
+        return geo;
+      }
+
+      const body = new THREE.Group();
+      m.add(body);
+
+      // Torso moldeado: cruz, lomo, pecho profundo, vientre recogido, grupa redonda
+      {
+        const geo = new THREE.SphereGeometry(1, 56, 36);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+          const u = x;
+          if (y > 0) {
+            y += 0.16 * bump(u, 0.55, 0.22) * y;          // cruz
+            y -= 0.08 * bump(u, 0.0, 0.35) * y;           // lomo
+            y += 0.06 * bump(u, -0.6, 0.3) * y;           // grupa
+          } else {
+            y *= 1 + 0.18 * bump(u, 0.55, 0.35);          // pecho
+            y *= 1 - 0.18 * bump(u, -0.55, 0.3);          // vientre recogido
+          }
+          z *= 1 + 0.12 * bump(u, -0.6, 0.35);
+          pos.setXYZ(i, x * 1.15, y * 0.5, z * 0.38);
+        }
+        geo.computeVertexNormals();
+        mesh(geo, coat, body, 0, 1.45, 0);
+      }
+
+      // Cuello y cabeza (con pivote para cabecear al galopar)
+      const neckPivot = new THREE.Group();
+      neckPivot.position.set(0.8, 1.62, 0);
+      body.add(neckPivot);
+      const neckPts = [new V(0, 0, 0), new V(0.3, 0.38, 0), new V(0.55, 0.78, 0), new V(0.72, 0.98, 0)];
+      mesh(taperTube(neckPts, 0.36, 0.17, 0.72), coat, neckPivot);
+
+      const headG = new THREE.Group();
+      headG.position.set(0.74, 0.98, 0);
+      headG.rotation.z = -1.0;
+      neckPivot.add(headG);
+      {
+        const geo = new THREE.SphereGeometry(1, 40, 28);
+        const pos = geo.attributes.position;
+        for (let i = 0; i < pos.count; i++) {
+          let x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+          const t = (x + 1) / 2;                          // 0 nuca → 1 hocico
+          const taper = 1 - 0.38 * t;
+          y *= taper;
+          z *= taper * (1 - 0.1 * t);
+          if (y < 0) y *= 1 + 0.35 * bump(x, -0.45, 0.3); // quijada
+          pos.setXYZ(i, x * 0.44, y * 0.21, z * 0.17);
+        }
+        geo.computeVertexNormals();
+        mesh(geo, coat, headG, 0.2, 0, 0);
+      }
+      mesh(sphere, muzzleMat, headG, 0.58, -0.02, 0).scale.set(0.13, 0.12, 0.115);
+      [-1, 1].forEach((s) => {
+        mesh(sphere, dark, headG, 0.66, 0.01, 0.07 * s).scale.set(0.03, 0.02, 0.015);
+        mesh(sphere, dark, headG, 0.0, 0.07, 0.15 * s).scale.set(0.045, 0.04, 0.03);
+        mesh(sphere, shineMatH, headG, 0.012, 0.085, 0.17 * s).scale.setScalar(0.011);
+        const brow = mesh(new THREE.BoxGeometry(0.11, 0.02, 0.02), coat, headG, 0.0, 0.12, 0.145 * s);
+        brow.rotation.z = -0.3;
+        const earGeo = new THREE.ConeGeometry(0.05, 0.2, 10);
+        const ear = mesh(earGeo, coat, headG, -0.2, 0.2, 0.07 * s);
+        ear.rotation.set(0.15 * s, 0, 0.55);
+      });
+      const nose = mesh(new THREE.TorusGeometry(0.135, 0.016, 6, 24), red, headG, 0.47, -0.01, 0);
+      nose.rotation.y = Math.PI / 2;
+      const cheek = mesh(new THREE.TorusGeometry(0.17, 0.014, 6, 24), red, headG, 0.0, -0.01, 0);
+      cheek.rotation.y = Math.PI / 2;
+      cheek.scale.set(1, 1.15, 1.05);
+      mesh(sphere, gold, headG, 0.0, -0.05, 0.18).scale.setScalar(0.03);
+
+      // Crin: mechones sobre la cresta del cuello
+      {
+        const curve = new THREE.CatmullRomCurve3(neckPts);
+        const strandGeo = new THREE.ConeGeometry(0.045, 0.32, 6);
+        strandGeo.translate(0, -0.16, 0);
+        for (let i = 0; i < 26; i++) {
+          const t = i / 25;
+          const c = curve.getPointAt(t);
+          const T = curve.getTangentAt(t);
+          const r = 0.36 + (0.17 - 0.36) * t;
+          const n = new V(-T.y, T.x, 0).normalize();
+          const s = mesh(strandGeo, maneMat, neckPivot, c.x + n.x * r * 0.95, c.y + n.y * r * 0.95, (i % 2 ? 0.06 : -0.03));
+          s.rotation.set(-0.5 + Math.random() * 0.3, 0, Math.atan2(T.y, T.x) + 0.6 + Math.random() * 0.3);
+          s.scale.setScalar(0.8 + Math.random() * 0.5);
+        }
+        for (let i = 0; i < 5; i++) {
+          const s = mesh(strandGeo, maneMat, headG, -0.16 + i * 0.02, 0.17, -0.04 + i * 0.02);
+          s.rotation.z = -1.9 + i * 0.1;
+          s.scale.setScalar(0.6);
+        }
+      }
+
+      // Cola: mechones largos
+      const tail = new THREE.Group();
+      tail.position.set(-1.12, 1.75, 0);
+      body.add(tail);
+      for (let i = 0; i < 8; i++) {
+        const dz = (i - 3.5) * 0.025;
+        const pts = [
+          new V(0, 0, dz),
+          new V(-0.22, -0.12, dz * 1.5),
+          new V(-0.4 - Math.random() * 0.1, -0.5, dz * 2.5),
+          new V(-0.5 - Math.random() * 0.15, -0.95 - Math.random() * 0.15, dz * 3.5),
+        ];
+        mesh(taperTube(pts, 0.07, 0.012, 1, 24), maneMat, tail);
+      }
+
+      // Pechera roja con medallón dorado
+      const strap = mesh(new THREE.TorusGeometry(0.5, 0.04, 8, 32), red, body, 0.82, 1.42, 0);
+      strap.rotation.y = Math.PI / 2;
+      strap.rotation.z = -0.35;
+      strap.scale.set(0.82, 1.0, 0.8);
+      const medal = mesh(new THREE.CylinderGeometry(0.1, 0.1, 0.035, 20), gold, body, 1.25, 1.33, 0);
+      medal.rotation.z = Math.PI / 2;
+
+      // Patas articuladas: antebrazo/muslo, rodilla/corvejón, caña, menudillo, cuartilla y casco
+      const legs = [];
+      const legDefs = [
+        { x: 0.78, z: 0.16, front: true, off: 0.45 * TAU },
+        { x: 0.78, z: -0.16, front: true, off: 0.55 * TAU },
+        { x: -0.78, z: 0.17, front: false, off: 0 },
+        { x: -0.78, z: -0.17, front: false, off: 0.1 * TAU },
+      ];
+      for (const d of legDefs) {
+        const upper = new THREE.Group();
+        upper.position.set(d.x, d.front ? 1.2 : 1.3, d.z);
+        const ug = d.front ? new THREE.CylinderGeometry(0.12, 0.075, 0.52, 12) : new THREE.CylinderGeometry(0.16, 0.08, 0.6, 12);
+        ug.translate(0, d.front ? -0.26 : -0.3, 0);
+        mesh(ug, coat, upper);
+        const kneeY = d.front ? -0.52 : -0.6;
+        mesh(sphere, coat, upper, 0, kneeY, 0).scale.setScalar(0.08);
+        const knee = new THREE.Group();
+        knee.position.y = kneeY;
+        upper.add(knee);
+        const cannonLen = d.front ? 0.42 : 0.44;
+        const cg = new THREE.CylinderGeometry(0.052, 0.05, cannonLen, 10);
+        cg.translate(0, -cannonLen / 2, 0);
+        mesh(cg, coat, knee);
+        mesh(sphere, coat, knee, 0, -cannonLen, 0).scale.set(0.068, 0.07, 0.065);
+        const pastern = new THREE.Group();
+        pastern.position.y = -cannonLen;
+        pastern.rotation.z = 0.35;
+        knee.add(pastern);
+        const pg = new THREE.CylinderGeometry(0.048, 0.055, 0.12, 10);
+        pg.translate(0, -0.06, 0);
+        mesh(pg, coat, pastern);
+        mesh(new THREE.CylinderGeometry(0.062, 0.085, 0.1, 12), hoofMat, pastern, 0.01, -0.16, 0);
+        body.add(upper);
+        legs.push({ upper, knee, pastern, front: d.front, off: d.off });
+      }
+      return { root, model: m, body, headG: neckPivot, tail, legs };
+    }
+    const horse = makeHorse();
+    horse.root.visible = false;
+    scene.add(horse.root);
+
+    // Caballo realista: modelo animado de los ejemplos de three.js (licencia MIT), pintado como Maximus
+    let horseMixer = null;
+    new GLTFLoader().load(
+      'https://cdn.jsdelivr.net/gh/mrdoob/three.js@r160/examples/models/gltf/Horse.glb',
+      (gltf) => {
+        const hm = gltf.scene.children[0];
+        const geo = hm.geometry;
+        const pos = geo.attributes.position;
+        const col = geo.attributes.color;
+        const classes = [
+          { c: [0.38, 0.11, 0.04], to: [0.92, 0.9, 0.86] },   // pelaje
+          { c: [0.10, 0.02, 0.01], to: null },                // patas
+          { c: [0.11, 0.04, 0.04], to: [0.72, 0.68, 0.64] },  // hocico
+          { c: [0.05, 0.01, 0.01], to: [0.78, 0.52, 0.16] },  // crin y cola
+          { c: [0.52, 0.28, 0.15], to: [0.95, 0.74, 0.32] },  // reflejos de la crin
+          { c: [0.04, 0.01, 0.01], to: [0.02, 0.02, 0.02] },  // ojos
+        ];
+        for (let i = 0; i < col.count; i++) {
+          const r = col.getX(i), g = col.getY(i), b = col.getZ(i);
+          let best = classes[0], bd = Infinity;
+          for (const k of classes) {
+            const d = (r - k.c[0]) ** 2 + (g - k.c[1]) ** 2 + (b - k.c[2]) ** 2;
+            if (d < bd) { bd = d; best = k; }
+          }
+          const to = best.to || (pos.getY(i) < 7 ? [0.07, 0.06, 0.05] : [0.85, 0.83, 0.79]);
+          col.setXYZ(i, to[0], to[1], to[2]);
+        }
+        geo.computeVertexNormals();
+        hm.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.55, metalness: 0 });
+        hm.scale.setScalar(0.0105);
+        hm.rotation.y = Math.PI / 2;
+        hm.position.y = 0.02;
+        horse.root.add(hm);
+        horse.model.visible = false;
+        horseMixer = new THREE.AnimationMixer(hm);
+        const action = horseMixer.clipAction(gltf.animations[0]);
+        action.timeScale = 1.4;
+        action.play();
+        horseMixer.update(M.phase / 14 % 1);
+      },
+      undefined,
+      () => { /* si no carga, se queda el caballo hecho a mano */ }
+    );
+
+    // ---------- Eugene (Flynn Rider) persiguiendo a Maximus ----------
+    function makeFlynn() {
+      const root = new THREE.Group();
+      const inner = new THREE.Group();
+      inner.rotation.y = Math.PI / 2;
+      root.add(inner);
+      const body = new THREE.Group();
+      inner.add(body);
+      const skin = new THREE.MeshStandardMaterial({ color: '#f1c7a3', roughness: 0.6 });
+      const shirt = new THREE.MeshStandardMaterial({ color: '#f2ede0', roughness: 0.7 });
+      const vest = new THREE.MeshStandardMaterial({ color: '#2e6f73', roughness: 0.6, side: THREE.DoubleSide });
+      const pants = new THREE.MeshStandardMaterial({ color: '#5a3d2b', roughness: 0.7 });
+      const boots = new THREE.MeshStandardMaterial({ color: '#3a2618', roughness: 0.6 });
+      const hairMat = new THREE.MeshStandardMaterial({ color: '#4a2c1a', roughness: 0.5 });
+      const dark = new THREE.MeshStandardMaterial({ color: '#1a1410', roughness: 0.3 });
+
+      const legs = [-1, 1].map((s) => {
+        const g = new THREE.Group();
+        g.position.set(0.08 * s, 0.55, 0);
+        const lg = new THREE.CylinderGeometry(0.05, 0.045, 0.42, 8);
+        lg.translate(0, -0.21, 0);
+        mesh(lg, pants, g);
+        mesh(new THREE.CylinderGeometry(0.058, 0.06, 0.16, 8), boots, g, 0, -0.45, 0.01);
+        mesh(sphere, boots, g, 0, -0.52, 0.05).scale.set(0.055, 0.035, 0.09);
+        body.add(g);
+        return g;
+      });
+      mesh(new THREE.CylinderGeometry(0.15, 0.13, 0.42, 14), shirt, body, 0, 0.78, 0);
+      mesh(new THREE.CylinderGeometry(0.165, 0.15, 0.36, 14, 1, true, 0.4, TAU - 0.8), vest, body, 0, 0.8, 0);
+      const belt = mesh(new THREE.TorusGeometry(0.135, 0.022, 6, 20), boots, body, 0, 0.6, 0);
+      belt.rotation.x = Math.PI / 2;
+
+      const arms = [-1, 1].map((s) => {
+        const g = new THREE.Group();
+        g.position.set(0.19 * s, 0.95, 0);
+        const ag = new THREE.CylinderGeometry(0.04, 0.035, 0.34, 8);
+        ag.translate(0, -0.17, 0);
+        mesh(ag, shirt, g);
+        mesh(sphere, skin, g, 0, -0.36, 0).scale.setScalar(0.04);
+        body.add(g);
+        return g;
+      });
+
+      const head = new THREE.Group();
+      head.position.y = 1.18;
+      body.add(head);
+      mesh(sphere, skin, head).scale.setScalar(0.16);
+      mesh(sphere, hairMat, head, 0, 0.05, -0.04).scale.set(0.17, 0.15, 0.16);
+      mesh(sphere, hairMat, head, 0.03, 0.13, 0.06).scale.set(0.13, 0.05, 0.1);
+      mesh(sphere, hairMat, head, 0, -0.13, 0.11).scale.set(0.03, 0.035, 0.025);
+      [-1, 1].forEach((s) => {
+        mesh(sphere, dark, head, 0.055 * s, 0.02, 0.145).scale.set(0.02, 0.025, 0.01);
+        const brow = mesh(new THREE.BoxGeometry(0.05, 0.012, 0.01), hairMat, head, 0.055 * s, 0.06, 0.15);
+        brow.rotation.z = 0.3 * s;
+      });
+      const mouth = mesh(new THREE.TorusGeometry(0.03, 0.008, 6, 12, Math.PI), dark, head, 0, -0.06, 0.15);
+      mouth.rotation.z = 0;
+      return { root, inner, body, legs, arms, head, custom: null };
+    }
+    const flynn = makeFlynn();
+    flynn.root.visible = false;
+    scene.add(flynn.root);
+    const flynnBubble = document.getElementById('flynnBubble');
+
+    // ---------- Modelos realistas opcionales ----------
+    // Si existen modelos/eugene.glb o modelos/pascal.glb (servidos desde un servidor local),
+    // se usan en lugar de los personajes hechos a mano, con su propia animación.
+    function loadOptionalModel(url, height, onReady) {
+      new GLTFLoader().load(url, (gltf) => {
+        const obj = gltf.scene;
+        const box = new THREE.Box3().setFromObject(obj);
+        const size = box.getSize(new V());
+        obj.scale.setScalar(height / (size.y || 1));
+        box.setFromObject(obj);
+        obj.position.y -= box.min.y;
+        obj.traverse((o) => { if (o.isMesh) o.frustumCulled = false; });
+        let mixer = null;
+        if (gltf.animations.length) {
+          mixer = new THREE.AnimationMixer(obj);
+          const clip = gltf.animations.find((a) => /run|corr/i.test(a.name))
+            || gltf.animations.find((a) => /walk|camin/i.test(a.name))
+            || gltf.animations[0];
+          mixer.clipAction(clip).play();
+        }
+        const pivot = new THREE.Group();
+        pivot.add(obj);
+        onReady({ pivot, mixer });
+      }, undefined, () => { /* no existe: se queda el personaje hecho a mano */ });
+    }
+
+    loadOptionalModel('../modelos/eugene.glb', 1.35, (c) => {
+      flynn.inner.add(c.pivot);
+      flynn.body.visible = false;
+      flynn.custom = c;
+    });
+    loadOptionalModel('../modelos/pascal.glb', 0.9, (c) => {
+      model.visible = false;
+      inner.add(c.pivot);
+      pascalCustom = c;
+    });
+
+    const dust = [];
+    const dustMat = new THREE.SpriteMaterial({ map: glowTex, color: '#e8d9c0', transparent: true, opacity: 0.5, depthWrite: false });
+
+    // ---------- Estado de Pascal ----------
+    const P = {
+      vine: vines[0],
+      u: 0.3,
+      dir: 1,
+      speed: 0.55,
+      mode: 'walk',      // walk | pause | hang | jump | fall | dizzy
+      timer: 3,
+      jump: null,
+      shy: false,
+      noT: 0,
+      lickT: 0,
+      blinkT: 2,
+      happyT: 0,
+      lookAt: new V(0, 0, 10),
+      lookGoal: new V(0, 0, 10),
+    };
+    vines[0].group.add(root);
+
+    function pascalScale() {
+      return THREE.MathUtils.clamp(Math.min(WW, HH) * 0.16, 0.34, 0.6);
+    }
+    inner.scale.setScalar(pascalScale());
+
+    const basis = new THREE.Matrix4();
+    const qGoal = new THREE.Quaternion();
+    const tmp = new V();
+    const projV = new V();
+
+    function placeOnVine(dt) {
+      const v = P.vine;
+      const p = v.curve.getPointAt(P.u);
+      const T = v.curve.getTangentAt(P.u);
+      const N = new V(-T.y, T.x, 0).normalize();
+      if (N.dot(v.up) < 0) N.negate();
+      const F = T.clone().multiplyScalar(P.dir);
+      const Z = new V().crossVectors(F, N);
+      basis.makeBasis(F, N, Z);
+      qGoal.setFromRotationMatrix(basis);
+      root.quaternion.slerp(qGoal, Math.min(dt * 10, 1));
+      root.position.copy(p).addScaledVector(N, 0.04);
+    }
+
+    function placeHanging(time) {
+      const p = P.vine.curve.getPointAt(P.u);
+      const s = inner.scale.x;
+      const th = -Math.PI / 2 + Math.sin(time * 2.2) * 0.35;
+      const cx = -1.05 * s, cy = 0.5 * s;
+      root.rotation.set(0, 0, th);
+      root.position.set(
+        p.x - (cx * Math.cos(th) - cy * Math.sin(th)),
+        p.y - (cx * Math.sin(th) + cy * Math.cos(th)),
+        p.z
+      );
+    }
+
+    function flyTo(end, { onLand, dur = 0.9, height = 1.6 }) {
+      const start = new V();
+      root.getWorldPosition(start);
+      scene.attach(root);
+      P.jump = { start, end, t: 0, dur, height, onLand, spin: end.x > start.x ? -1 : 1 };
+      P.mode = 'jump';
+    }
+
+    function jumpTo(vine, u) {
+      const end = vine.group.localToWorld(vine.curve.getPointAt(u).clone());
+      flyTo(end, {
+        onLand: () => {
+          vine.group.attach(root);
+          P.vine = vine;
+          P.u = u;
+          P.dir = Math.random() < 0.5 ? 1 : -1;
+          P.mode = 'walk';
+          P.timer = 2 + Math.random() * 3;
+        },
+      });
+    }
+
+    function randomJump() {
+      const walkable = vines.filter((v) => v.walk && v !== P.vine && !v.grabbed && v.grow >= 1);
+      if (!walkable.length) return;
+      const v = Math.random() < 0.4 && vines[0] !== P.vine ? vines[0] : walkable[(Math.random() * walkable.length) | 0];
+      jumpTo(v, v.kind === 'garland' ? 0.15 + Math.random() * 0.7 : 0.25 + Math.random() * 0.6);
+    }
+
+    // Punto sobre el borde superior de la tarjeta, en el mundo 3D
+    const ray = new THREE.Raycaster();
+    const ndc = new THREE.Vector2();
+    const plane0 = new THREE.Plane(new V(0, 0, 1), 0);
+    function cardTopWorld(out) {
+      const r = form.getBoundingClientRect();
+      ndc.set(((r.left + r.width * 0.68) / window.innerWidth) * 2 - 1, -((r.top + 2) / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      return ray.ray.intersectPlane(plane0, out) || out.set(0, 0, 0);
+    }
+
+    function knockPascal() {
+      if (P.mode === 'fall' || P.mode === 'dizzy') return;
+      P.shy = false;
+      say('¡¿Qué pasó?! 😵‍💫', 2.4);
+      flyTo(cardTopWorld(new V()), {
+        dur: 1.3,
+        height: 2.4,
+        onLand: () => {
+          root.rotation.set(0, 0, 0);
+          P.mode = 'dizzy';
+          P.timer = 99;
+          dizzy.visible = true;
+          setTimeout(() => P.mode === 'dizzy' && say('Ese caballo… 😵', 2.2), 1500);
+        },
+      });
+      P.mode = 'fall';
+    }
+
+    let bubbleUntil = 0;
+    function say(text, secs = 2.4) {
+      bubble.textContent = text;
+      bubble.classList.add('show');
+      bubbleUntil = gameTime + secs;
+    }
+
+    function headScreen() {
+      head.getWorldPosition(tmp);
+      tmp.project(camera);
+      return {
+        x: (tmp.x * 0.5 + 0.5) * window.innerWidth,
+        y: (-tmp.y * 0.5 + 0.5) * window.innerHeight,
+      };
+    }
+
+    function popHearts(n = 10) {
+      const { x, y } = headScreen();
+      for (let i = 0; i < n; i++) {
+        const h = document.createElement('span');
+        h.className = 'pop-heart';
+        h.textContent = ['💖', '💗', '💕'][i % 3];
+        h.style.left = x + (Math.random() - 0.5) * 40 + 'px';
+        h.style.top = y + (Math.random() - 0.5) * 20 + 'px';
+        h.style.setProperty('--dx', (Math.random() - 0.5) * 140 + 'px');
+        h.style.animationDelay = i * 0.08 + 's';
+        document.body.appendChild(h);
+        setTimeout(() => h.remove(), 1500 + i * 80);
+      }
+    }
+
+    const lookPlane = new THREE.Plane(new V(0, 0, 1), -1.5);
+    function screenToWorld(x, y, out) {
+      ndc.set((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      return ray.ray.intersectPlane(lookPlane, out) || out.copy(camera.position);
+    }
+    function lookAtCaret() {
+      const r = userInput.getBoundingClientRect();
+      screenToWorld(r.left + 16 + Math.min(userInput.value.length * 9, r.width - 32), r.top + r.height / 2, P.lookGoal);
+    }
+    function pascalHit(e) {
+      ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      return ray.intersectObject(hit, false).length > 0;
+    }
+
+    window.addEventListener('pointermove', (e) => {
+      if (document.activeElement !== userInput) screenToWorld(e.clientX, e.clientY, P.lookGoal);
+    });
+    userInput.addEventListener('focus', () => { lookAtCaret(); say('¿Quién eres? 👀'); });
+    userInput.addEventListener('input', lookAtCaret);
+    passInput.addEventListener('focus', () => { P.shy = true; say('No veo nada, lo prometo 🙈'); });
+    passInput.addEventListener('blur', () => { P.shy = false; });
+
+    // El lienzo del frente no recibe clics (para no tapar el formulario); se detecta a Pascal desde la ventana
+    window.addEventListener('pointerdown', (e) => {
+      if (!pascalHit(e)) return;
+      colorIndex = (colorIndex + 1) % cycle.length;
+      setColor(cycle[colorIndex]);
+      P.lickT = 0.8;
+      if (P.mode === 'dizzy') {
+        say('Todavía veo estrellitas… ⭐', 2);
+        return;
+      }
+      say(['¡Wiii! 🎨', '¡Hola Karen! 💚', '¡No me atrapas! 🦎', '¿Me das una flor? 🌷', '¡Mira cómo salto! ✨'][(Math.random() * 5) | 0]);
+      if (P.mode !== 'jump' && P.mode !== 'fall') randomJump();
+    });
+
+    let lastHover = 0;
+    window.addEventListener('pointermove', (e) => {
+      if (e.pointerType !== 'mouse') return;
+      const now = performance.now();
+      if (now - lastHover < 80) return;
+      lastHover = now;
+      document.body.style.cursor = pascalHit(e) ? 'pointer' : '';
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (userInput.value === 'karen' && passInput.value === '2020') {
+        P.shy = false;
+        passInput.blur();
+        setColor('rosa');
+        P.lickT = 0.8;
+        P.happyT = 1.6;
+        popHearts(12);
+        say('¡Eres tú! Pasa, pasa 💖', 2);
+        setTimeout(() => { window.location.href = '../home/isa.html'; }, 1700);
+      } else {
+        document.getElementById('error-message').style.display = 'block';
+        form.classList.remove('shake');
+        void form.offsetWidth;
+        form.classList.add('shake');
+        setColor('rojo');
+        P.noT = 0.8;
+        say('Mmm… esa no es 😤');
+        setTimeout(() => setColor(cycle[colorIndex]), 1800);
+      }
+    });
+
+    // ---------- Escena de Maximus ----------
+    const HORSE_FIRST = 7;
+    const HORSE_EVERY = 40;
+    const M = { active: false, x: 0, phase: 0, nextAt: HORSE_FIRST, regrowAt: -1, knocked: false, dustT: 0 };
+
+    // Altura del "suelo" en el borde inferior de la pantalla para una profundidad z
+    const groundY = (z) => -(10 - z) * tan20 + 0.18;
+
+    function horseScale() {
+      return THREE.MathUtils.clamp(Math.min(WW, HH) * 0.3, 0.5, 1);
+    }
+
+    // Estado de Eugene
+    const F = { x: 0, mode: 'run', t: 0, tripped: false, phase: 0, slide: 0 };
+    const easeOut = (t) => 1 - (1 - t) * (1 - t);
+
+    function updateFlynn(dt, horseSpeed, hs) {
+      F.t += dt;
+      const gap = M.x - F.x;
+      let lean = 0.25;
+      let running = true;
+      if (F.mode === 'run') {
+        // Corre a la velocidad del caballo; más rápido si se quedó atrás
+        const catchUp = gap > 3.4 * hs ? 1.35 : 1;
+        F.x += horseSpeed * catchUp * dt;
+        if (!F.tripped && F.x > -0.3) {
+          F.tripped = true;
+          F.mode = 'fall';
+          F.t = 0;
+          flynnBubble.textContent = '¡Auch! 😖';
+        }
+      } else if (F.mode === 'fall') {
+        const k = Math.min(F.t / 0.35, 1);
+        lean = 0.25 + (1.5 - 0.25) * k * k;
+        F.x += horseSpeed * 0.6 * (1 - k) * dt;
+        running = false;
+        if (k >= 1) { F.mode = 'down'; F.t = 0; }
+      } else if (F.mode === 'down') {
+        lean = 1.5;
+        running = false;
+        if (F.t > 0.9) { F.mode = 'up'; F.t = 0; flynnBubble.textContent = '¡Vuelve aquí, caballo tonto! 😤'; }
+      } else if (F.mode === 'up') {
+        const k = easeOut(Math.min(F.t / 0.6, 1));
+        lean = 1.5 + (0.25 - 1.5) * k;
+        running = false;
+        if (F.t >= 0.6) { F.mode = 'run'; F.t = 0; }
+      }
+
+      flynn.root.position.set(F.x, groundY(1.2), 1.2);
+      F.phase += dt * (running ? 12 : 4);
+      const fs = Math.sin(F.phase);
+      flynn.body.rotation.x = lean;
+      if (running) {
+        flynn.legs[0].rotation.x = fs * 1.0;
+        flynn.legs[1].rotation.x = -fs * 1.0;
+        flynn.arms[0].rotation.set(-1.5 + Math.sin(F.phase * 2) * 0.25, 0, -0.1);
+        flynn.arms[1].rotation.set(-1.4 + Math.cos(F.phase * 2) * 0.25, 0, 0.1);
+        flynn.body.position.y = Math.abs(Math.cos(F.phase)) * 0.06;
+      } else if (F.mode === 'down') {
+        // Patalea en el suelo
+        flynn.legs[0].rotation.x = -0.4 + fs * 0.5;
+        flynn.legs[1].rotation.x = -0.4 - fs * 0.5;
+        flynn.arms[0].rotation.set(-2.8, 0, -0.3);
+        flynn.arms[1].rotation.set(-2.8, 0, 0.3);
+        flynn.body.position.y = 0.08;
+      } else {
+        flynn.legs[0].rotation.x = -0.3;
+        flynn.legs[1].rotation.x = 0.3;
+        flynn.arms[0].rotation.set(-2.2, 0, -0.4);
+        flynn.arms[1].rotation.set(-2.2, 0, 0.4);
+        flynn.body.position.y = 0.04;
+      }
+      flynn.head.rotation.z = Math.sin(F.phase) * 0.06;
+      if (flynn.custom) {
+        flynn.custom.pivot.rotation.x = lean - 0.25;
+        if (flynn.custom.mixer) flynn.custom.mixer.update(running ? dt : 0);
+      }
+    }
+
+    function startHorse() {
+      const hs = horseScale();
+      F.x = -WW - 3 * hs - 3.3 * hs;
+      F.mode = 'run';
+      F.tripped = false;
+      M.active = true;
+      M.knocked = false;
+      M.x = -WW - 3 * hs;
+      horse.root.scale.setScalar(hs);
+      horse.root.position.set(M.x, groundY(1), 1);
+      horse.root.visible = true;
+      flynn.root.visible = true;
+      flynn.root.scale.setScalar(hs * 1.2);
+      flynnBubble.textContent = '¡Detente, caballo tonto! 😤';
+    }
+
+    function updateHorse(dt, time) {
+      if (!M.active) {
+        if (M.regrowAt < 0 && time > M.nextAt && vines.every((v) => v.grow >= 1)) startHorse();
+        if (M.regrowAt > 0 && time > M.regrowAt) {
+          M.regrowAt = -1;
+          buildVines(true);
+          M.nextAt = time + HORSE_EVERY;
+        }
+        return;
+      }
+      const hs = horseScale();
+      const speed = (2 * WW + 6 * hs) / 3.4;
+      M.x += speed * dt;
+      horse.root.position.set(M.x, groundY(1), 1);
+
+      // Galope
+      if (horseMixer) horseMixer.update(dt);
+      M.phase += dt * 14;
+      for (const l of horse.legs) {
+        const s = Math.sin(M.phase + l.off);
+        l.upper.rotation.z = (l.front ? 0.1 : -0.05) + s * 0.55;
+        const bend = Math.max(0, Math.sin(M.phase + l.off + (l.front ? 1.4 : 1.0)));
+        l.knee.rotation.z = l.front ? -bend * 1.4 : bend * 0.9;
+        l.pastern.rotation.z = 0.35 + (l.front ? -bend * 0.6 : bend * 0.3);
+      }
+      horse.body.position.y = Math.abs(Math.sin(M.phase * 0.5 + 0.6)) * 0.14;
+      horse.model.rotation.z = Math.sin(M.phase + 0.8) * 0.06;
+      horse.headG.rotation.z = Math.sin(M.phase + 2.0) * 0.1;
+      horse.tail.rotation.z = 0.35 + Math.sin(M.phase * 0.5) * 0.2;
+
+      // Eugene corriendo detrás, intentando agarrarlo
+      updateFlynn(dt, speed, hs);
+      const fx = F.x;
+      if (fx > -WW - 0.5 && fx < WW + 0.5) {
+        flynnBubble.classList.add('show');
+        flynn.head.getWorldPosition(projV);
+        projV.y += 0.35 * hs;
+        projV.project(camera);
+        const bx = (projV.x * 0.5 + 0.5) * window.innerWidth;
+        const by = (-projV.y * 0.5 + 0.5) * window.innerHeight;
+        const bw = flynnBubble.offsetWidth;
+        flynnBubble.style.transform = `translate(${Math.min(Math.max(bx, bw / 2 + 8), window.innerWidth - bw / 2 - 8)}px, ${by}px) translate(-50%, -100%)`;
+      } else {
+        flynnBubble.classList.remove('show');
+      }
+
+      // Polvo de los cascos
+      M.dustT -= dt;
+      if (M.dustT < 0) {
+        M.dustT = 0.05;
+        const s = new THREE.Sprite(dustMat.clone());
+        s.position.set(M.x - 0.6 * hs, groundY(1.1) + 0.1, 1.1);
+        s.scale.setScalar(0.3);
+        scene.add(s);
+        dust.push({ s, life: 0 });
+      }
+
+      // Se lleva las enredaderas
+      const tailPos = tmp.set(M.x - 1.3 * hs, groundY(1) + 1.4 * hs, 1);
+      for (const v of vines) {
+        if (!v.grabbed && M.x > v.cx - 0.5) {
+          v.grabbed = { ox: -Math.random() * 1.2, oy: Math.random() * 0.8, spin: (Math.random() - 0.5) * 4 };
+        }
+        if (v.grabbed) {
+          const g = v.grabbed;
+          v.group.position.lerp(new V(tailPos.x + g.ox, tailPos.y + g.oy, 0.5), Math.min(dt * 4, 1));
+          const sc = Math.max(v.group.scale.x - dt * 0.8, 0.3);
+          v.group.scale.setScalar(sc);
+          v.group.rotation.z += g.spin * dt;
+        }
+      }
+
+      // Pascal sale volando
+      root.getWorldPosition(tmp);
+      if (!M.knocked && (M.x > tmp.x - 0.8 || (P.vine && P.vine.grabbed))) {
+        M.knocked = true;
+        knockPascal();
+      }
+
+      if (M.x > WW + 3 * hs + 5 && F.x > WW + 1) {
+        M.active = false;
+        horse.root.visible = false;
+        flynn.root.visible = false;
+        flynnBubble.classList.remove('show');
+        vineRoot.visible = false;
+        M.regrowAt = time + 1.5;
+      }
+    }
+
+    let builtAspect = camera.aspect;
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+      bgRenderer.setSize(w, h);
+      HH = 10 * tan20;
+      WW = HH * camera.aspect;
+      layoutBackground();
+      // Cambios pequeños (como abrir el teclado del celular) no reconstruyen las enredaderas
+      if (Math.abs(camera.aspect - builtAspect) / builtAspect < 0.12) return;
+      builtAspect = camera.aspect;
+      const idx = Math.max(vines.indexOf(P.vine), 0);
+      const onVine = ['walk', 'pause', 'hang'].includes(P.mode);
+      if (root.parent !== scene) scene.attach(root);
+      buildVines(false);
+      if (M.active) {
+        M.active = false;
+        horse.root.visible = false;
+        flynn.root.visible = false;
+        flynnBubble.classList.remove('show');
+      }
+      if (onVine) {
+        P.vine = vines[idx];
+        P.vine.group.add(root);
+      } else if (P.mode === 'dizzy') {
+        cardTopWorld(root.position);
+      }
+      inner.scale.setScalar(pascalScale());
+    });
+
+    // ---------- Animación ----------
+    const clock = new THREE.Clock();
+    let gameTime = 0;
+    setTimeout(() => say('¡Hola! Te estaba esperando 💚', 3), 1200);
+
+    function animate(forcedDt) {
+      if (forcedDt === undefined) requestAnimationFrame(() => animate());
+      const dt = forcedDt ?? Math.min(clock.getDelta(), 0.05);
+      gameTime += dt;
+      const time = gameTime;
+
+      // Enredaderas: crecer y mecerse
+      let allGrown = true;
+      for (const v of vines) {
+        if (v.grow < 1) {
+          allGrown = false;
+          v.grow += dt / 1.2;
+          const g = Math.min(Math.max(v.grow, 0), 1);
+          v.group.scale.setScalar(Math.max(g > 0 ? easeOutBack(g) : 0.001, 0.001));
+        }
+        if (v.sway && !v.grabbed) v.group.rotation.z = Math.sin(time * 0.8 + v.phase) * v.sway;
+      }
+
+      updateHorse(dt, time);
+
+      for (let i = dust.length - 1; i >= 0; i--) {
+        const d = dust[i];
+        d.life += dt;
+        d.s.scale.setScalar(0.3 + d.life * 1.6);
+        d.s.position.y += dt * 0.4;
+        d.s.material.opacity = Math.max(0.5 - d.life * 0.8, 0);
+        if (d.life > 0.65) {
+          scene.remove(d.s);
+          d.s.material.dispose();
+          dust.splice(i, 1);
+        }
+      }
+
+      // Linternas
+      const aspect = camera.aspect;
+      for (const l of lanterns) {
+        const depth = 10 - l.g.position.z;
+        const halfH = depth * tan20;
+        l.y += (l.speed * dt) / (halfH * 2 + 2);
+        if (l.y > 1) l.y = 0;
+        l.g.position.x = l.xn * halfH * aspect * 1.05 + Math.sin(time * 0.4 + l.phase) * 0.3;
+        l.g.position.y = -halfH - 1 + l.y * (halfH * 2 + 2);
+        l.g.rotation.z = Math.sin(time * 0.7 + l.phase) * 0.08;
+      }
+
+      // Colores del camaleón
+      const k = Math.min(dt * 4, 1);
+      skinMat.color.lerp(target.skin, k);
+      darkMat.color.lerp(target.dark, k);
+      bellyMat.color.lerp(target.belly, k);
+
+      // Movimiento de Pascal
+      let walking = false;
+      if (P.mode === 'jump' || P.mode === 'fall') {
+        const j = P.jump;
+        j.t = Math.min(j.t + dt / j.dur, 1);
+        root.position.lerpVectors(j.start, j.end, j.t);
+        root.position.y += Math.sin(Math.PI * j.t) * j.height;
+        root.rotation.set(0, 0, j.spin * j.t * TAU * (P.mode === 'fall' ? 2 : 1));
+        if (j.t >= 1) j.onLand();
+      } else if (P.mode === 'dizzy') {
+        root.rotation.set(0, 0, Math.sin(time * 5) * 0.18);
+        dizzy.rotation.y += dt * 5;
+        P.lookGoal.set(
+          root.position.x + Math.cos(time * 7) * 2,
+          root.position.y + 1 + Math.sin(time * 7) * 2,
+          2
+        );
+        if (allGrown && vineRoot.visible && M.regrowAt < 0 && !M.active && P.timer > 50) {
+          P.timer = 1.5;
+        }
+        P.timer -= dt;
+        if (P.timer < 0) {
+          dizzy.visible = false;
+          say('¡Ya estoy bien! 💚', 1.8);
+          jumpTo(vines[0], 0.5);
+        }
+      } else if (P.mode === 'hang') {
+        placeHanging(time);
+        P.timer -= dt;
+        if (P.timer < 0) { P.mode = 'walk'; P.timer = 3 + Math.random() * 3; }
+      } else {
+        P.timer -= dt;
+        if (P.mode === 'walk') {
+          walking = true;
+          P.u += (P.dir * P.speed * dt) / P.vine.len;
+          if (P.u > 0.97) { P.u = 0.97; P.dir = -1; }
+          if (P.u < 0.03) { P.u = 0.03; P.dir = 1; }
+        }
+        placeOnVine(dt);
+        if (P.timer < 0 && !P.shy && P.happyT <= 0) {
+          const r = Math.random();
+          if (P.mode === 'pause') {
+            P.mode = 'walk';
+            P.timer = 3 + Math.random() * 3;
+            if (Math.random() < 0.4) P.dir *= -1;
+          } else if (P.vine.kind === 'garland' && r < 0.35) {
+            P.mode = 'hang';
+            P.timer = 3 + Math.random() * 2;
+            say(['¡Mírame colgado! 🙃', '¡Wiii! 💚', '¡Sin manos! 🦎'][(Math.random() * 3) | 0], 1.8);
+          } else if (r < 0.6) {
+            P.mode = 'pause';
+            P.timer = 1 + Math.random() * 1.5;
+          } else if (r < 0.8) {
+            randomJump();
+          } else {
+            P.dir *= -1;
+            P.timer = 2 + Math.random() * 3;
+          }
+        }
+      }
+
+      if (pascalCustom && pascalCustom.mixer) pascalCustom.mixer.update(walking ? dt : dt * 0.3);
+
+      // Patas, cuerpo, cola
+      const step = time * 9;
+      legs.forEach((l, i) => {
+        l.rotation.x = walking ? Math.sin(step + (i === 0 || i === 3 ? 0 : Math.PI)) * 0.6 : 0;
+      });
+      body.scale.y = 0.4 * (1 + Math.sin(time * 2.4) * 0.03);
+      tailG.rotation.x = Math.sin(time * 1.3) * 0.12 + (P.mode === 'hang' ? 0.25 : 0);
+      tailG.rotation.z = Math.sin(time * 0.9) * 0.06;
+
+      if (P.happyT > 0) {
+        P.happyT -= dt;
+        bodyG.position.y = Math.abs(Math.sin(P.happyT * 8)) * 0.35;
+      } else {
+        bodyG.position.y = walking ? Math.abs(Math.sin(step)) * 0.03 : 0;
+      }
+
+      let hy = Math.sin(time * 0.7) * 0.15;
+      let hx = 0;
+      if (P.shy) { hy = -0.7; hx = 0.3; }
+      if (P.mode === 'dizzy') { hy = Math.sin(time * 4) * 0.4; hx = Math.cos(time * 4) * 0.2; }
+      if (P.noT > 0) {
+        P.noT -= dt;
+        hy += Math.sin(P.noT * 30) * P.noT * 0.8;
+      }
+      head.rotation.y += (hy - head.rotation.y) * Math.min(dt * 8, 1);
+      head.rotation.x += (hx - head.rotation.x) * Math.min(dt * 8, 1);
+
+      if (P.lickT > 0) {
+        P.lickT = Math.max(P.lickT - dt, 0);
+        const L = Math.sin(Math.PI * (1 - P.lickT / 0.8)) * 1.3;
+        tongue.visible = L > 0.02;
+        tongue.scale.set(1, 1, Math.max(L, 0.001));
+        tongueTip.scale.set(0.06, 0.06, 0.06 / Math.max(L, 0.001));
+      } else {
+        tongue.visible = false;
+      }
+
+      P.lookAt.lerp(P.lookGoal, Math.min(dt * (P.mode === 'dizzy' ? 20 : 8), 1));
+      P.blinkT -= dt;
+      if (P.blinkT < -0.15) P.blinkT = 2 + Math.random() * 3;
+      const closed = P.shy || P.blinkT < 0;
+      for (const e of eyes) {
+        e.look.lookAt(P.lookAt);
+        const sy = closed ? 0.08 : 1;
+        e.ball.scale.y += (sy - e.ball.scale.y) * Math.min(dt * 20, 1);
+      }
+
+      if (bubble.classList.contains('show')) {
+        if (time > bubbleUntil) bubble.classList.remove('show');
+        const { x, y } = headScreen();
+        const bw = bubble.offsetWidth;
+        const bx = Math.min(Math.max(x, bw / 2 + 8), window.innerWidth - bw / 2 - 8);
+        const by = Math.max(y - 36, 44);
+        bubble.style.transform = `translate(${bx}px, ${by}px) translate(-50%, -100%)`;
+      }
+
+      if (forcedDt !== undefined) return;
+      render();
+    }
+
+    function render() {
+      bgRenderer.render(bgScene, camera);
+      renderer.render(scene, camera);
+    }
+    // Para revisar una escena: pedida.html#t=9 simula 9 segundos al cargar
+    const skipTo = Number((location.hash.match(/^#t=(\d+(?:\.\d+)?)/) || [])[1] || 0);
+    for (let i = 0; i < skipTo * 30; i++) animate(1 / 30);
+    if (skipTo) {
+      const hold = () => { requestAnimationFrame(hold); render(); };
+      hold();
+    } else {
+      animate();
     }
   </script>
 </body>
