@@ -151,6 +151,26 @@
     }
     .rap-bubble.show { opacity: 1; }
 
+    .can-hint {
+      position: fixed;
+      left: 0;
+      top: 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(127, 209, 199, 0.92);
+      color: #0f3b3a;
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      z-index: 3;
+    }
+    .can-hint.show { opacity: 1; animation: canBob 1.6s ease-in-out infinite; }
+    @keyframes canBob { 50% { margin-top: -6px; } }
+
     @media (max-width: 520px) {
       .hint { white-space: normal; text-align: center; width: calc(100% - 32px); font-size: 12px; }
       .intro h2 { font-size: 44px; }
@@ -267,8 +287,9 @@
     <p class="sub">Cada flor es un pedacito de lo que siento ❤️</p>
   </div>
 
-  <div class="hint" id="hint">Arrastra para girar · Toca una flor 💗 · ¡Atrapa a Rapunzel!</div>
+  <div class="hint" id="hint">Arrastra para girar · Toca una flor 💗 · ¡Atrapa a Rapunzel! · Riega con la regadera 💧</div>
   <div class="rap-bubble" id="rapBubble"></div>
+  <div class="can-hint" id="canHint">💧 Arrástrame a las flores</div>
 
   <div class="intro" id="intro">
     <div class="intro-card">
@@ -739,6 +760,7 @@
 
       const flower = buildHead(cfg.type, PALETTES[cfg.pal]);
       flower.baseScale = cfg.size;
+      Object.assign(flower, { origScale: cfg.size, targetScale: cfg.size, water: 0, nextReward: 1, wet: 0 });
       flower.head.position.copy(curve.getPoint(1));
       flower.head.quaternion.setFromUnitVectors(UP, curve.getTangent(1).normalize());
       flower.head.scale.setScalar(cfg.size);
@@ -748,6 +770,7 @@
       plant.scale.setScalar(0.0001);
       scene.add(plant);
       plants.push({
+        hw: new THREE.Vector3(),
         plant, flower,
         delay: index === 0 ? 0 : 0.35 + index * 0.13,
         phase: rand() * TAU,
@@ -1055,7 +1078,7 @@
     function rapSay(text, secs = 1.6) {
       rapBubble.textContent = text;
       rapBubble.classList.add('show');
-      rapBubbleUntil = clock.getElapsedTime() + secs;
+      rapBubbleUntil = gameTime + secs;
     }
 
     function rapFlee() {
@@ -1178,6 +1201,272 @@
       }
     }
 
+    // ---------- Regadera ----------
+    const can = (() => {
+      const root = new THREE.Group();
+      const tilt = new THREE.Group();
+      root.add(tilt);
+      const body = new THREE.Group();
+      body.rotation.y = -0.45;
+      tilt.add(body);
+      const metal = new THREE.MeshStandardMaterial({ color: '#7fd1c7', metalness: 0.55, roughness: 0.3 });
+      const trim = new THREE.MeshStandardMaterial({ color: '#f6b6dc', metalness: 0.4, roughness: 0.3 });
+      const add = (geo, mat, x = 0, y = 0, z = 0) => {
+        const m = new THREE.Mesh(geo, mat);
+        m.position.set(x, y, z);
+        m.castShadow = true;
+        body.add(m);
+        return m;
+      };
+      add(new THREE.CylinderGeometry(0.3, 0.34, 0.5, 32), metal);
+      add(new THREE.TorusGeometry(0.3, 0.025, 8, 32), trim, 0, 0.25, 0).rotation.x = Math.PI / 2;
+      add(new THREE.TorusGeometry(0.34, 0.022, 8, 32), trim, 0, -0.25, 0).rotation.x = Math.PI / 2;
+      add(new THREE.CircleGeometry(0.285, 32), new THREE.MeshStandardMaterial({ color: '#2f7f8f', roughness: 0.2 }), 0, 0.235, 0).rotation.x = -Math.PI / 2;
+      add(new THREE.TorusGeometry(0.22, 0.03, 10, 28, Math.PI), trim, 0.08, 0.25, 0);
+      // Pico
+      const spoutGeo = new THREE.CylinderGeometry(0.032, 0.06, 0.6, 14);
+      spoutGeo.translate(0, 0.3, 0);
+      const spout = add(spoutGeo, metal, -0.27, -0.12, 0);
+      spout.rotation.z = 0.8;
+      const rose = new THREE.Group();
+      rose.position.set(0, 0.6, 0);
+      spout.add(rose);
+      const roseHead = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.035, 0.09, 18), trim);
+      roseHead.position.y = 0.04;
+      rose.add(roseHead);
+      const roseFace = new THREE.Mesh(new THREE.CircleGeometry(0.088, 18), new THREE.MeshStandardMaterial({ color: '#d8f4ff', metalness: 0.3, roughness: 0.4 }));
+      roseFace.position.y = 0.086;
+      roseFace.rotation.x = -Math.PI / 2;
+      rose.add(roseFace);
+      const tip = new THREE.Object3D();
+      tip.position.y = 0.11;
+      rose.add(tip);
+      const spoutBase = new THREE.Object3D();
+      spout.add(spoutBase);
+      // Corazoncito decorativo
+      const heart = add(heartGeo, new THREE.MeshStandardMaterial({ color: '#ff5c93', emissive: '#ff1f6b', emissiveIntensity: 0.4 }), 0, 0.02, 0.33);
+      heart.scale.setScalar(0.4);
+      // Zona invisible para agarrarla
+      const hit = new THREE.Mesh(new THREE.SphereGeometry(0.6, 8, 6), new THREE.MeshBasicMaterial({ visible: false }));
+      root.add(hit);
+      root.visible = false;
+      scene.add(root);
+      return { root, tilt, tip, spoutBase, hit };
+    })();
+
+    const CAN = {
+      dragging: false,
+      justDropped: false,
+      used: false,
+      ndc: new THREE.Vector2(),
+      emitAcc: 0,
+      rainbow: false,
+    };
+    const canGoal = new THREE.Vector3();
+    const canPlane = new THREE.Plane();
+    const canRay = new THREE.Raycaster();
+    const camDir = new THREE.Vector3();
+
+    // Gotas de agua
+    const WATER = 280;
+    const drops = new THREE.InstancedMesh(
+      new THREE.SphereGeometry(0.034, 6, 4),
+      new THREE.MeshStandardMaterial({ color: '#c8eeff', emissive: '#5cc4ff', emissiveIntensity: 0.4, transparent: true, opacity: 0.9, roughness: 0.1 }),
+      WATER
+    );
+    drops.frustumCulled = false;
+    scene.add(drops);
+    const dropData = Array.from({ length: WATER }, () => ({ alive: false, splash: false, p: new THREE.Vector3(), v: new THREE.Vector3(), life: 0 }));
+    let dropCursor = 0;
+    const tipPos = new THREE.Vector3();
+    const basePos = new THREE.Vector3();
+    const spoutDir = new THREE.Vector3();
+
+    function emitDrop() {
+      const d = dropData[dropCursor];
+      dropCursor = (dropCursor + 1) % WATER;
+      d.alive = true;
+      d.splash = false;
+      d.life = 0;
+      d.p.copy(tipPos);
+      d.v.copy(spoutDir).multiplyScalar(1.2 + Math.random() * 0.8);
+      d.v.x += (Math.random() - 0.5) * 1.1;
+      d.v.y += (Math.random() - 0.5) * 0.5;
+      d.v.z += (Math.random() - 0.5) * 1.1;
+    }
+
+    function splash(d) {
+      d.splash = true;
+      d.life = 0;
+      d.p.y = Math.max(d.p.y, 0.06);
+      d.v.set((Math.random() - 0.5) * 1.2, 0.8 + Math.random() * 1.2, (Math.random() - 0.5) * 1.2);
+    }
+
+    // Arcoíris cuando ya regaste casi todas
+    const rainbow = new THREE.Group();
+    ['#ff4d4d', '#ff9f40', '#ffe14d', '#5ee36b', '#4dc3ff', '#6a6aff', '#b36bff'].forEach((c, i) => {
+      rainbow.add(new THREE.Mesh(
+        new THREE.TorusGeometry(7 - i * 0.24, 0.12, 8, 96, Math.PI),
+        new THREE.MeshBasicMaterial({ color: c, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false, fog: false })
+      ));
+    });
+    rainbow.visible = false;
+    scene.add(rainbow);
+    let rainbowT = 0;
+
+    function waterFlower(f, at) {
+      f.water += 0.03;
+      f.wet = 1;
+      if (f.water >= f.nextReward) {
+        f.nextReward += 1;
+        f.targetScale = Math.min(f.targetScale + 0.1, f.origScale * 1.4);
+        f.pulse = 1;
+        spawnHearts(at, 5);
+        const watered = plants.filter((p) => p.flower.nextReward > 1).length;
+        if (!CAN.rainbow && watered >= Math.min(10, plants.length)) {
+          CAN.rainbow = true;
+          rainbow.visible = true;
+          const hint = document.getElementById('hint');
+          hint.textContent = '🌈 ¡Las flores te lo agradecen!';
+          hint.classList.add('show');
+          setTimeout(() => hint.classList.remove('show'), 6000);
+          try { window.goatcounter && window.goatcounter.count({ path: 'rego-flores', title: 'Regó todas las flores 🌈', event: true }); } catch (e) { /* sin contador */ }
+        }
+      }
+    }
+
+    function ndcToWorld(nx, ny, dist, out) {
+      out.set(nx, ny, 0.5).unproject(camera).sub(camera.position).normalize();
+      return out.multiplyScalar(dist).add(camera.position);
+    }
+
+    function canIdlePos(out) {
+      const narrow = camera.aspect < 0.8;
+      return ndcToWorld(narrow ? 0.62 : 0.82, narrow ? -0.8 : -0.68, 5, out);
+    }
+
+    const canHint = document.getElementById('canHint');
+    const headPos = new THREE.Vector3();
+
+    function updateCan(dt, time) {
+      const show = introDone;
+      can.root.visible = show;
+      if (!show) return;
+
+      // A dónde va: la esquina o donde la arrastras (en un plano a la altura del ramo)
+      let pouring = false;
+      if (CAN.dragging) {
+        canRay.setFromCamera(CAN.ndc, camera);
+        camera.getWorldDirection(camDir);
+        // Plano un poco delante del ramo, para que la regadera quede por fuera de las flores
+        canPlane.setFromNormalAndCoplanarPoint(camDir.clone().negate(), target.clone().addScaledVector(camDir, -2.4));
+        if (!canRay.ray.intersectPlane(canPlane, canGoal)) canIdlePos(canGoal);
+        canGoal.y = Math.max(canGoal.y, 0.9);
+        pouring = Math.hypot(canGoal.x, canGoal.z) < 4.2;
+      } else {
+        canIdlePos(canGoal);
+        canGoal.y += Math.sin(time * 2) * 0.03;
+      }
+      can.root.position.lerp(canGoal, Math.min(dt * 12, 1));
+      can.root.scale.setScalar((camera.position.distanceTo(can.root.position) / 5) * (camera.aspect < 0.8 ? 0.6 : 0.72));
+      can.root.quaternion.copy(camera.quaternion);
+      const tiltGoal = pouring ? 0.8 : CAN.dragging ? 0.15 : Math.sin(time * 1.5) * 0.05;
+      can.tilt.rotation.z += (tiltGoal - can.tilt.rotation.z) * Math.min(dt * 8, 1);
+
+      // Echar agua
+      if (pouring && can.tilt.rotation.z > 0.5) {
+        can.tip.getWorldPosition(tipPos);
+        can.spoutBase.getWorldPosition(basePos);
+        spoutDir.subVectors(tipPos, basePos).normalize();
+        CAN.emitAcc += dt * 110;
+        while (CAN.emitAcc > 1) { emitDrop(); CAN.emitAcc -= 1; }
+      }
+
+      // Mover gotas y ver si caen sobre una flor
+      for (const p of plants) {
+        p.flower.head.getWorldPosition(p.hw);
+      }
+      for (let i = 0; i < WATER; i++) {
+        const d = dropData[i];
+        if (d.alive) {
+          d.life += dt;
+          d.v.y -= 9.8 * dt;
+          d.p.addScaledVector(d.v, dt);
+          if (!d.splash) {
+            for (const p of plants) {
+              const r = 0.6 * p.flower.baseScale;
+              if (p.plant.scale.x > 0.9 && d.p.distanceToSquared(p.hw) < r * r) {
+                waterFlower(p.flower, p.hw);
+                splash(d);
+                break;
+              }
+            }
+            if (!d.splash && d.p.y < 0.05) splash(d);
+          } else if (d.life > 0.35 || d.p.y < 0) {
+            d.alive = false;
+          }
+        }
+        if (d.alive) {
+          const s = d.splash ? 0.5 * (1 - d.life / 0.35) : 1;
+          dummy.position.copy(d.p);
+          dummy.rotation.set(0, 0, 0);
+          dummy.scale.set(s, s * (d.splash ? 1 : 2.2), s);
+        } else {
+          dummy.scale.setScalar(0.0001);
+        }
+        dummy.updateMatrix();
+        drops.setMatrixAt(i, dummy.matrix);
+      }
+      drops.instanceMatrix.needsUpdate = true;
+
+      // Arcoíris detrás del ramo, siempre de frente a la cámara
+      if (rainbow.visible) {
+        rainbowT = Math.min(rainbowT + dt / 3, 1);
+        camera.getWorldDirection(camDir);
+        camDir.y = 0;
+        camDir.normalize();
+        rainbow.position.set(camDir.x * 7, -0.6, camDir.z * 7);
+        rainbow.lookAt(camera.position.x, -0.6, camera.position.z);
+        rainbow.children.forEach((m) => { m.material.opacity = 0.35 * rainbowT; });
+      }
+
+      // Etiqueta "arrástrame" hasta que la usen
+      if (!CAN.used) {
+        headPos.copy(can.root.position).y += 0.55 * can.root.scale.x;
+        headPos.project(camera);
+        canHint.style.transform = `translate(${(headPos.x * 0.5 + 0.5) * window.innerWidth}px, ${(-headPos.y * 0.5 + 0.5) * window.innerHeight}px) translate(-50%, -100%)`;
+        canHint.classList.add('show');
+      } else {
+        canHint.classList.remove('show');
+      }
+    }
+
+    // Arrastrar la regadera (en captura, antes que los controles de la cámara)
+    window.addEventListener('pointerdown', (e) => {
+      if (!can.root.visible) return;
+      CAN.ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+      canRay.setFromCamera(CAN.ndc, camera);
+      if (!canRay.intersectObject(can.hit, false).length) return;
+      CAN.dragging = true;
+      CAN.used = true;
+      controls.enabled = false;
+      renderer.domElement.style.cursor = 'grabbing';
+      e.preventDefault();
+    }, true);
+    window.addEventListener('pointermove', (e) => {
+      if (!CAN.dragging) return;
+      CAN.ndc.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    }, true);
+    const dropCan = () => {
+      if (!CAN.dragging) return;
+      CAN.dragging = false;
+      CAN.justDropped = true;
+      controls.enabled = true;
+      renderer.domElement.style.cursor = 'grab';
+    };
+    window.addEventListener('pointerup', dropCan, true);
+    window.addEventListener('pointercancel', dropCan, true);
+
     // ---------- Post-procesado (bloom) ----------
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
@@ -1224,6 +1513,7 @@
 
     renderer.domElement.addEventListener('pointerdown', (e) => { downX = e.clientX; downY = e.clientY; });
     renderer.domElement.addEventListener('pointerup', (e) => {
+      if (CAN.justDropped) { CAN.justDropped = false; return; }
       if (openedAt === null) return;
       if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return;
       setNdc(e);
@@ -1248,6 +1538,11 @@
       if (now - lastHover < 60) return;
       lastHover = now;
       setNdc(e);
+      if (CAN.dragging) return;
+      if (can.root.visible && raycaster.intersectObject(can.hit, false).length) {
+        renderer.domElement.style.cursor = 'grab';
+        return;
+      }
       renderer.domElement.style.cursor = (raycaster.intersectObject(rap.hit, false).length || raycaster.intersectObjects(heads, true).length) ? 'pointer' : 'grab';
     });
 
@@ -1260,7 +1555,7 @@
     if (location.hash === '#abrir') setTimeout(() => openBtn.click(), 50);
     openBtn.addEventListener('click', () => {
       if (openedAt !== null) return;
-      openedAt = clock.getElapsedTime();
+      openedAt = gameTime;
       try { window.goatcounter && window.goatcounter.count({ path: 'abrio-sorpresa', title: 'Abrió la sorpresa 🌷', event: true }); } catch (e) { /* sin contador */ }
       introFrom.copy(camera.position);
       intro.classList.add('hide');
@@ -1275,10 +1570,12 @@
     const BLOOM = 2.4;
     let introDone = false;
 
-    function animate() {
-      requestAnimationFrame(animate);
-      const dt = Math.min(clock.getDelta(), 0.05);
-      const time = clock.elapsedTime;
+    let gameTime = 0;
+    function animate(forcedDt) {
+      if (forcedDt === undefined) requestAnimationFrame(() => animate());
+      const dt = forcedDt ?? Math.min(clock.getDelta(), 0.05);
+      gameTime += dt;
+      const time = gameTime;
       uTime.value = time;
       const since = openedAt === null ? -1 : time - openedAt;
 
@@ -1317,13 +1614,16 @@
         f.extras.scale.setScalar(Math.max(eb, 0.001));
 
         if (f.pulse > 0) f.pulse = Math.max(f.pulse - dt * 1.6, 0);
-        f.head.scale.setScalar(f.baseScale * (1 + 0.22 * Math.sin(Math.PI * (1 - f.pulse)) * (f.pulse > 0 ? 1 : 0)));
+        f.baseScale += (f.targetScale - f.baseScale) * Math.min(dt * 2, 1);
+        f.wet = Math.max(f.wet - dt * 2, 0);
+        f.head.scale.setScalar(f.baseScale * (1 + 0.22 * Math.sin(Math.PI * (1 - f.pulse)) * (f.pulse > 0 ? 1 : 0) + Math.sin(time * 24) * 0.04 * f.wet));
 
         p.plant.rotation.z = Math.sin(time * 0.9 + p.phase) * 0.035;
         p.plant.rotation.x = Math.cos(time * 0.7 + p.phase) * 0.025;
       }
 
       updateRapunzel(dt, time);
+      updateCan(dt, time);
 
       // Linternas que suben al cielo
       for (const l of skyLanterns) {
@@ -1409,9 +1709,26 @@
       }
       fallMesh.instanceMatrix.needsUpdate = true;
 
-      composer.render();
+      if (forcedDt === undefined) composer.render();
     }
-    animate();
+
+    // Para revisar: isa.html#t=8 simula 8 segundos (abre la sorpresa); con &regar arrastra la regadera al ramo
+    const testMatch = location.hash.match(/^#t=(\d+(?:\.\d+)?)/);
+    if (testMatch) {
+      openBtn.click();
+      const secs = Number(testMatch[1]);
+      for (let i = 0; i < secs * 30; i++) {
+        if (location.hash.includes('regar') && introDone && !CAN.dragging) {
+          CAN.dragging = true;
+          CAN.ndc.set(0.1, 0.25);
+        }
+        animate(1 / 30);
+      }
+      const hold = () => { requestAnimationFrame(hold); composer.render(); };
+      hold();
+    } else {
+      animate();
+    }
   </script>
   <!-- Contador de visitas (GoatCounter) -->
   <script data-goatcounter="https://wiliwli.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
